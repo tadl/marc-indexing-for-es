@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim" xmlns:marc="http://www.loc.gov/MARC21/slim">
+  <record xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
+    <leader>01525cam a22004218i 45 0</leader>
+    <controlfield tag="001">46747646</controlfield>
+    <controlfield tag="003">ME</controlfield>
+    <controlfield tag="005">20140216105149.0</controlfield>
+    <controlfield tag="008">130722s2014    nyu           000 1 eng  </controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">  2013026652</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(OCoLC)ocn852221721</subfield>
+    </datafield>
+    <datafield tag="040" ind1=" " ind2=" ">
+      <subfield code="a">DLC</subfield>
+      <subfield code="b">eng</subfield>
+      <subfield code="e">rda</subfield>
+      <subfield code="c">DLC</subfield>
+      <subfield code="d">BTCTA</subfield>
+      <subfield code="d">YDXCP</subfield>
+      <subfield code="d">OCLCO</subfield>
+      <subfield code="d">UPZ</subfield>
+      <subfield code="d">IH7</subfield>
+      <subfield code="d">ER2</subfield>
+    </datafield>
+    <datafield tag="019" ind1=" " ind2=" ">
+      <subfield code="a">852238689</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">9780525953180 (hardcover)</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">0525953183 (hardcover)</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(OCoLC)852221721</subfield>
+      <subfield code="z">(OCoLC)852238689</subfield>
+    </datafield>
+    <datafield tag="042" ind1=" " ind2=" ">
+      <subfield code="a">pcc</subfield>
+    </datafield>
+    <datafield tag="050" ind1="0" ind2="0">
+      <subfield code="a">PS3619.U327</subfield>
+      <subfield code="b">I54 2014</subfield>
+    </datafield>
+    <datafield tag="082" ind1="0" ind2="0">
+      <subfield code="a">813/.6</subfield>
+      <subfield code="2">23</subfield>
+    </datafield>
+    <datafield tag="049" ind1=" " ind2=" ">
+      <subfield code="a">ER2A</subfield>
+    </datafield>
+    <datafield tag="100" ind1="1" ind2=" ">
+      <subfield code="a">Suarez, Daniel,</subfield>
+      <subfield code="d">1964-</subfield>
+    </datafield>
+    <datafield tag="245" ind1="1" ind2="0">
+      <subfield code="a">Influx /</subfield>
+      <subfield code="c">Daniel Suarez.</subfield>
+    </datafield>
+    <datafield tag="250" ind1=" " ind2=" ">
+      <subfield code="a">First edition.</subfield>
+    </datafield>
+    <datafield tag="264" ind1=" " ind2="1">
+      <subfield code="a">New York, N.Y. :</subfield>
+      <subfield code="b">Dutton, Penguin Group, USA,</subfield>
+      <subfield code="c">[2014]</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">393 pages, 6 unnumbered pages ;</subfield>
+      <subfield code="c">24 cm</subfield>
+    </datafield>
+    <datafield tag="336" ind1=" " ind2=" ">
+      <subfield code="a">text</subfield>
+      <subfield code="2">rdacontent</subfield>
+    </datafield>
+    <datafield tag="337" ind1=" " ind2=" ">
+      <subfield code="a">unmediated</subfield>
+      <subfield code="2">rdamedia</subfield>
+    </datafield>
+    <datafield tag="338" ind1=" " ind2=" ">
+      <subfield code="a">volume</subfield>
+      <subfield code="2">rdacarrier</subfield>
+    </datafield>
+    <datafield tag="520" ind1=" " ind2=" ">
+      <subfield code="a">A tale set in a world in which technological advances have been suppressed finds particle physicist Jon Grady helping to innovate a device capable of reflecting gravity only to be targeted by a shadowy organization from the future.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Physicists</subfield>
+      <subfield code="v">Fiction.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Discoveries in science</subfield>
+      <subfield code="v">Fiction.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Gravitational waves</subfield>
+      <subfield code="v">Fiction.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Space and time</subfield>
+      <subfield code="v">Fiction.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Extremists</subfield>
+      <subfield code="v">Fiction.</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="a">Science fiction.</subfield>
+      <subfield code="2">gsafd</subfield>
+    </datafield>
+    <datafield tag="655" ind1=" " ind2="7">
+      <subfield code="a">Suspense fiction.</subfield>
+      <subfield code="2">gsafd</subfield>
+    </datafield>
+    <datafield tag="938" ind1=" " ind2=" ">
+      <subfield code="a">Baker and Taylor</subfield>
+      <subfield code="b">BTCP</subfield>
+      <subfield code="n">BK0013549833</subfield>
+    </datafield>
+    <datafield tag="938" ind1=" " ind2=" ">
+      <subfield code="a">YBP Library Services</subfield>
+      <subfield code="b">YANK</subfield>
+      <subfield code="n">10834382</subfield>
+    </datafield>
+    <datafield tag="994" ind1=" " ind2=" ">
+      <subfield code="a">C0</subfield>
+      <subfield code="b">ER2</subfield>
+    </datafield>
+    <datafield tag="901" ind1=" " ind2=" ">
+      <subfield code="a">BK0013549833</subfield>
+      <subfield code="b">DLC</subfield>
+      <subfield code="c">46747646</subfield>
+      <subfield code="t">biblio</subfield>
+    </datafield>
+  </record>
+</collection>
+

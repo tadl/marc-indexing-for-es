@@ -1,0 +1,97 @@
+<?xml version="1.0"?>
+<collection xmlns="http://www.loc.gov/MARC21/slim" xmlns:marc="http://www.loc.gov/MARC21/slim">
+  <record xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.loc.gov/MARC21/slim http://www.loc.gov/standards/marcxml/schema/MARC21slim.xsd">
+    <leader>01226nam a2200301   4500</leader>
+    <controlfield tag="001">48003860</controlfield>
+    <controlfield tag="003">ME</controlfield>
+    <controlfield tag="005">20140811111448.0</controlfield>
+    <controlfield tag="008">920211s1993    nyua   j      000 0 eng  </controlfield>
+    <datafield tag="010" ind1=" " ind2=" ">
+      <subfield code="a">92005214 /AC</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">0679837159 (trade) :</subfield>
+      <subfield code="c">$13.00 ($16.50 Can.)</subfield>
+    </datafield>
+    <datafield tag="020" ind1=" " ind2=" ">
+      <subfield code="a">0679937153 (lib. bdg.) :</subfield>
+      <subfield code="c">$13.99</subfield>
+    </datafield>
+    <datafield tag="035" ind1=" " ind2=" ">
+      <subfield code="a">(DLC)005-7791</subfield>
+    </datafield>
+    <datafield tag="040" ind1=" " ind2=" ">
+      <subfield code="a">DLC</subfield>
+      <subfield code="c">DLC</subfield>
+      <subfield code="d">DLC</subfield>
+    </datafield>
+    <datafield tag="050" ind1="0" ind2="0">
+      <subfield code="a">PS586.3</subfield>
+      <subfield code="b">.A2 1993</subfield>
+    </datafield>
+    <datafield tag="082" ind1="0" ind2="0">
+      <subfield code="a">811.008/09282</subfield>
+      <subfield code="2">20</subfield>
+    </datafield>
+    <datafield tag="245" ind1="0" ind2="0">
+      <subfield code="a">A. Nonny Mouse writes again! :</subfield>
+      <subfield code="b">poems /</subfield>
+      <subfield code="c">selected by Jack Prelutsky ; illustrated by Marjorie Priceman.</subfield>
+    </datafield>
+    <datafield tag="260" ind1=" " ind2=" ">
+      <subfield code="a">New York :</subfield>
+      <subfield code="b">Knopf :</subfield>
+      <subfield code="b">Distributed by Random House,</subfield>
+      <subfield code="c">c1993.</subfield>
+    </datafield>
+    <datafield tag="300" ind1=" " ind2=" ">
+      <subfield code="a">1 v. (unpaged) :</subfield>
+      <subfield code="b">col. ill. ;</subfield>
+      <subfield code="c">29 cm.</subfield>
+    </datafield>
+    <datafield tag="520" ind1=" " ind2=" ">
+      <subfield code="a">Another illustrated collection of primarily traditional or anonymous verses, most of which are humorous and easily memorized.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Children's poetry, American.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Children's poetry, English.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="0">
+      <subfield code="a">Anonymous writings.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="1">
+      <subfield code="a">American poetry</subfield>
+      <subfield code="x">Collections.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="1">
+      <subfield code="a">English poetry</subfield>
+      <subfield code="x">Collections.</subfield>
+    </datafield>
+    <datafield tag="650" ind1=" " ind2="1">
+      <subfield code="a">Anonymous writings.</subfield>
+    </datafield>
+    <datafield tag="700" ind1="1" ind2=" ">
+      <subfield code="a">Prelutsky, Jack.</subfield>
+    </datafield>
+    <datafield tag="700" ind1="1" ind2=" ">
+      <subfield code="a">Priceman, Marjorie</subfield>
+      <subfield code="e">ill.</subfield>
+    </datafield>
+    <datafield tag="949" ind1="1" ind2=" ">
+      <subfield code="a">005</subfield>
+      <subfield code="t">7791 A. NONNY MOUSE WRITES AGAIN! :  POEMS /  SELECTED BY JACK PRELUTSKY ; ILLUSTRATED BY MARJORIE PRICEMAN.</subfield>
+    </datafield>
+    <datafield tag="903" ind1=" " ind2=" ">
+      <subfield code="a">48003860</subfield>
+    </datafield>
+    <datafield tag="901" ind1=" " ind2=" ">
+      <subfield code="a">KCL-7791</subfield>
+      <subfield code="b">KCL</subfield>
+      <subfield code="c">48003860</subfield>
+      <subfield code="t">biblio</subfield>
+    </datafield>
+  </record>
+</collection>
+
