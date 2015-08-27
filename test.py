@@ -11,7 +11,7 @@ dom = ET.parse(xml_filename)
 xslt = ET.parse(xsl_filename)
 transform = ET.XSLT(xslt)
 newdom = transform(dom)
-print(ET.tostring(newdom, pretty_print=True))
+#print(ET.tostring(newdom, pretty_print=True))
 
 namespace_dict = {'mods32': 'http://www.loc.gov/mods/v3'}
 
