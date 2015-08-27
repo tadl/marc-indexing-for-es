@@ -15,20 +15,26 @@ newdom = transform(dom)
 
 namespace_dict = {'mods32': 'http://www.loc.gov/mods/v3'}
 
-title_xpath = '//mods32:mods/mods32:titleInfo[mods32:title and not (@type)]'
+indexes = {
+    'title': {
+        'xpath': "//mods32:mods/mods32:titleInfo[mods32:title and not (@type)]",
+    },
+    'author': {
+        'xpath': "//mods32:mods/mods32:name[@type='personal' and mods32:role/mods32:roleTerm[text()='creator']]",
+        'post_xpath': "//*[local-name()='namePart']"
+    }
+}
 
-r = newdom.xpath(title_xpath, namespaces=namespace_dict)
+for index in indexes.keys():
+    xpath = indexes[index]['xpath']
+    post_xpath = None
+    if 'post_xpath' in indexes[index]:
+        post_xpath = indexes[index]['post_xpath']
+    r = newdom.xpath(xpath, namespaces=namespace_dict)
+    result = None
+    if len(r):
+        if post_xpath:
+            r = r[0].xpath(post_xpath)
+        result = ' '.join(r[0].itertext())
+    print index, result
 
-title = ' '.join(r[0].itertext())
-
-print title
-
-author_xpath = "//mods32:mods/mods32:name[@type='personal' and mods32:role/mods32:roleTerm[text()='creator']]"
-
-r = newdom.xpath(author_xpath, namespaces=namespace_dict)
-
-if len(r):
-    r = r[0].xpath("//*[local-name()='namePart']")
-    author = ' '.join(r[0].itertext())
-
-    print author
