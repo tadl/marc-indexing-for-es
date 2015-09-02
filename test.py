@@ -30,20 +30,14 @@ collection_dom = ET.parse(xml_filename)
 collection = collection_dom.getroot()
 
 for record in collection:
-
-    mods = transform(record)
-
     output = {}
 
-    match_901 = record.xpath("//marc:record/marc:datafield[@tag='901']/marc:subfield[@code='c']", namespaces=namespace_dict)
-
-    print (ET.tostring(match_901[0], pretty_print=True))
+    match_901 = record.xpath("marc:datafield[@tag='901']/marc:subfield[@code='c']", namespaces=namespace_dict)
 
     if len(match_901):
         output['id'] = match_901[0].text
 
-    if output['id'] == '1027649':
-        print(ET.tostring(mods, pretty_print=True))
+    mods = transform(record)
 
     for index in indexes.keys():
         xpath = indexes[index]['xpath']
