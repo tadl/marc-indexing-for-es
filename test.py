@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-# Based partially on an example from http://stackoverflow.com/a/16699042/157515
+# xpath work Based partially on an example from
+# http://stackoverflow.com/a/16699042/157515
 
 import lxml.etree as ET
 
@@ -19,6 +20,12 @@ indexes = {
     'author': {
         'xpath': "//mods32:mods/mods32:name[@type='personal' and mods32:role/mods32:roleTerm[text()='creator']]",
         'post_xpath': "//*[local-name()='namePart']"
+    },
+    'abstract': {
+        'xpath': "//mods32:mods/mods32:abstract",
+    },
+    'physical_description': {
+        'xpath': "//mods32:mods/mods32:physicalDescription/mods32:extent",
     }
 }
 
@@ -52,5 +59,7 @@ for record in collection:
             result = ' '.join(r[0].itertext())
         if result:
             output[index] = result
+        else:
+            output[index] = ''
 
     print repr(output)
