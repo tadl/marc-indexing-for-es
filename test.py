@@ -57,9 +57,12 @@ for record in collection:
     if len(match_901):
         output['id'] = match_901[0].text
 
+    logging.debug('Found record id %s' % output['id'])
+
     mods = transform(record)
 
     for index in indexes.keys():
+        logging.debug('Indexing %s' % index)
         xpath = indexes[index]['xpath']
         post_xpath = None
         if 'post_xpath' in indexes[index]:
