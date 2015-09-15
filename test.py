@@ -3,7 +3,20 @@
 # xpath work Based partially on an example from
 # http://stackoverflow.com/a/16699042/157515
 
+import logging, logging.config, configparser
 import lxml.etree as ET
+
+import psycopg2
+
+logging.config.fileConfig('index-config.ini')
+config = configparser.ConfigParser()
+config.read('index-config.ini')
+
+dbcfg = config['target_db']
+
+conn = psycopg2.connect(dbname=dbcfg['dbname'], user=dbcfg['user'], password=dbcfg['password'], host=dbcfg['host'], port=dbcfg['port'])
+
+cur = conn.cursor()
 
 xml_filename = 'test-formatted.xml'
 xsl_filename = 'MARC21slim2MODS3-2.xsl'
@@ -62,4 +75,7 @@ for record in collection:
         else:
             output[index] = ''
 
-    print repr(output)
+    logging.debug(repr(output))
+    cur.execute("DELETE FROM records WHERE id = %s", (output['id'],))
+    cur.execute("INSERT INTO records (id, title, author, abstract, physical_description) VALUES (%s, %s, %s, %s, %s)", (output['id'], output['title'], output['author'], output['abstract'], output['physical_description']))
+    conn.commit()
