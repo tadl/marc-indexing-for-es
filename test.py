@@ -49,7 +49,13 @@ collection_dom = ET.parse(xml_filename)
 
 collection = collection_dom.getroot()
 
-for record in collection:
+def insert_to_target(output):
+    cur.execute("DELETE FROM records WHERE id = %s", (output['id'],))
+    cur.execute("INSERT INTO records (id, title, author, abstract, physical_description) VALUES (%s, %s, %s, %s, %s)", (output['id'], output['title'], output['author'], output['abstract'], output['physical_description']))
+    conn.commit()
+
+
+def index_record(record):
     output = {}
 
     match_901 = record.xpath("marc:datafield[@tag='901']/marc:subfield[@code='c']", namespaces=namespace_dict)
@@ -79,6 +85,8 @@ for record in collection:
             output[index] = ''
 
     logging.debug(repr(output))
-    cur.execute("DELETE FROM records WHERE id = %s", (output['id'],))
-    cur.execute("INSERT INTO records (id, title, author, abstract, physical_description) VALUES (%s, %s, %s, %s, %s)", (output['id'], output['title'], output['author'], output['abstract'], output['physical_description']))
-    conn.commit()
+
+
+for record in collection:
+    output = index_record(record)
+    insert_to_target(output)
