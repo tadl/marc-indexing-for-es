@@ -34,6 +34,10 @@ indexes = {
         'xpath': "//mods32:mods/mods32:name[@type='personal' and mods32:role/mods32:roleTerm[text()='creator']]",
         'post_xpath': "//*[local-name()='namePart']"
     },
+    'corpauthor': {
+        'xpath': "//mods32:mods/mods32:name[@type='corporate' and (mods32:role/mods32:roleTerm[text()='creator'] or mods32:role/mods32:roleTerm[text()='aut'] or mods32:role/mods32:roleTerm[text()='cre'])]",
+        'post_xpath': "//*[local-name()='namePart']"
+    },
     'abstract': {
         'xpath': "//mods32:mods/mods32:abstract",
     },
@@ -95,6 +99,10 @@ def index_record(record):
             output[index] = result
         else:
             output[index] = ''
+
+    if (output['author'] == ''):
+        logging.info('Setting corpauthor to author')
+        output['author'] = output['corpauthor']
 
     return output
 
