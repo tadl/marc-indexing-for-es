@@ -45,10 +45,6 @@ indexes = {
 xslt = ET.parse(xsl_filename)
 transform = ET.XSLT(xslt)
 
-collection_dom = ET.parse(xml_filename)
-
-collection = collection_dom.getroot()
-
 def insert_to_target(output):
     cur.execute("DELETE FROM records WHERE id = %s", (output['id'],))
     cur.execute("INSERT INTO records (id, title, author, abstract, physical_description) VALUES (%s, %s, %s, %s, %s)", (output['id'], output['title'], output['author'], output['abstract'], output['physical_description']))
@@ -87,6 +83,15 @@ def index_record(record):
     return output
 
 
-for record in collection:
-    output = index_record(record)
-    insert_to_target(output)
+if (xml_filename):
+    # Index records from XML file
+    collection_dom = ET.parse(xml_filename)
+
+    collection = collection_dom.getroot()
+
+    for record in collection:
+        output = index_record(record)
+        insert_to_target(output)
+else:
+    # Index records from database
+    logging.error('NOT IMPLEMENTED: Index records from database')
