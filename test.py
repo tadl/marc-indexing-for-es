@@ -16,6 +16,8 @@ config.read('index-config.ini')
 
 es = Elasticsearch([config['elasticsearch']['url']])
 
+es_index = config['elasticsearch']['index']
+
 if (es.ping()):
     print "ping!"
 
@@ -74,7 +76,7 @@ def insert_to_target(output):
         conn.commit()
 
 def insert_to_elasticsearch(output):
-    indexresult = es.index(index='records', doc_type='record', id=output['id'], body=output)
+    indexresult = es.index(index=es_index, doc_type='record', id=output['id'], body=output)
     logging.debug(repr(indexresult))
 
 
