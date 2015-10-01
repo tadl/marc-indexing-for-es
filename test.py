@@ -8,9 +8,16 @@ import lxml.etree as ET
 
 import psycopg2
 
+from elasticsearch import Elasticsearch
+
 logging.config.fileConfig('index-config.ini')
 config = configparser.ConfigParser()
 config.read('index-config.ini')
+
+es = Elasticsearch([config['elasticsearch']['url']])
+
+if (es.ping()):
+    print "ping!"
 
 dbcfg = config['target_db']
 
@@ -53,6 +60,9 @@ xslt = ET.parse(xsl_filename)
 transform = ET.XSLT(xslt)
 
 def insert_to_target(output):
+    # XXX: FIXME: Force to Elasticsearch for now
+    return insert_to_elasticsearch(output)
+
     try:
         cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, contents, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['contents'], output['physical_description']))
         conn.commit()
@@ -63,8 +73,15 @@ def insert_to_target(output):
         cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, contents, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['contents'], output['physical_description']))
         conn.commit()
 
+def insert_to_elasticsearch(output):
+    indexresult = es.index(index='records', doc_type='record', id=output['id'], body=output)
+    logging.debug(repr(indexresult))
+
 
 def get_max_update():
+    # XXX: FIXME: disabled for now
+    return None
+
     cur.execute("SELECT MAX(updated_at) FROM records;")
     result = cur.fetchone()
     max_update = result[0]
