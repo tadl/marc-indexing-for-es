@@ -72,6 +72,8 @@ def index_record(record):
 
     if len(match_901):
         output['id'] = match_901[0].text
+    else:
+        logging.error('RECORD HAS NO 901: %s' % record)
 
     logging.debug('Found record id %s' % output['id'])
 
