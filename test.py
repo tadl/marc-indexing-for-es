@@ -124,6 +124,12 @@ def index_record(record):
         logging.info('Setting corpauthor to author')
         output['author'] = output['corpauthor']
 
+    # XXX: FIXME: Insert fake holdings data
+    if (int(output['id']) % 2):
+        output['holdings'] = [{'barcode': 'barcode' + output['id'] + '1234', 'status': 'Available'}, {'barcode': 'barcode' + output['id'] + '9876', 'status': 'Checked out'}]
+    else:
+        output['holdings'] = [{'barcode': 'barcode' + output['id'] + '9876', 'status': 'Checked out'}]
+
     return output
 
 
