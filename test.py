@@ -129,9 +129,13 @@ else:
     max_update_date = get_max_update()
     egcur.execute('''
 WITH visible AS (
-SELECT DISTINCT record
+SELECT record
 FROM asset.opac_visible_copies aovc
 WHERE circ_lib IN (SELECT id FROM actor.org_unit_descendants(22))
+UNION
+SELECT record
+FROM asset.call_number acn
+WHERE label = '##URI##' AND owning_lib IN (SELECT id FROM actor.org_unit_descendants(22))
 )
 SELECT bre.id, bre.marc, (bre.create_date at time zone 'UTC')::timestamp, (bre.edit_date at time zone 'UTC')::timestamp
 FROM biblio.record_entry bre
