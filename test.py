@@ -46,9 +46,15 @@ xslt = ET.parse(xsl_filename)
 transform = ET.XSLT(xslt)
 
 def insert_to_target(output):
-    cur.execute("DELETE FROM records WHERE id = %s", (output['id'],))
-    cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['physical_description']))
-    conn.commit()
+    try:
+        cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['physical_description']))
+        conn.commit()
+    except psycopg2.IntegrityError:
+        logging.warning("Insert failed, deleting then re-inserting")
+        conn.rollback()
+        cur.execute("DELETE FROM records WHERE id = %s", (output['id'],))
+        cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['physical_description']))
+        conn.commit()
 
 
 def index_record(record):
