@@ -159,6 +159,7 @@ UNION
 SELECT record
 FROM asset.call_number acn
 WHERE label = '##URI##' AND owning_lib IN (SELECT id FROM actor.org_unit_descendants(22))
+AND NOT acn.deleted
 )
 SELECT bre.id, bre.marc, (bre.create_date at time zone 'UTC')::timestamp, (bre.edit_date at time zone 'UTC')::timestamp
 FROM biblio.record_entry bre
