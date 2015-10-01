@@ -84,7 +84,7 @@ def index_record(record):
         else:
             output[index] = ''
 
-    logging.debug(repr(output))
+    return output
 
 
 for record in collection:
