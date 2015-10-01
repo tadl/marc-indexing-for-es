@@ -47,7 +47,7 @@ transform = ET.XSLT(xslt)
 
 def insert_to_target(output):
     cur.execute("DELETE FROM records WHERE id = %s", (output['id'],))
-    cur.execute("INSERT INTO records (id, title, author, abstract, physical_description) VALUES (%s, %s, %s, %s, %s)", (output['id'], output['title'], output['author'], output['abstract'], output['physical_description']))
+    cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['physical_description']))
     conn.commit()
 
 
@@ -91,6 +91,8 @@ if (xml_filename):
 
     for record in collection:
         output = index_record(record)
+        output['create_date'] = None
+        output['edit_date'] = None
         insert_to_target(output)
 else:
     # Index records from database
