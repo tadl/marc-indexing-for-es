@@ -18,7 +18,7 @@ conn = psycopg2.connect(dbname=dbcfg['dbname'], user=dbcfg['user'], password=dbc
 
 cur = conn.cursor()
 
-xml_filename = 'test-formatted.xml'
+xml_filename = None
 xsl_filename = 'MARC21slim2MODS3-2.xsl'
 
 namespace_dict = {
@@ -55,6 +55,14 @@ def insert_to_target(output):
         cur.execute("DELETE FROM records WHERE id = %s", (output['id'],))
         cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['physical_description']))
         conn.commit()
+
+
+def get_max_update():
+    cur.execute("SELECT MAX(updated_at) FROM records;")
+    result = cur.fetchone()
+    max_update = result[0]
+    logging.debug('Max update is %s' % max_update)
+    return result[0]
 
 
 def index_record(record):
@@ -102,4 +110,28 @@ if (xml_filename):
         insert_to_target(output)
 else:
     # Index records from database
-    logging.error('NOT IMPLEMENTED: Index records from database')
+    egdbcfg = config['evergreen_db']
+    egconn = psycopg2.connect(dbname=egdbcfg['dbname'], user=egdbcfg['user'], password=egdbcfg['password'], host=egdbcfg['host'], port=egdbcfg['port'])
+    egcur = egconn.cursor()
+    max_update_date = get_max_update()
+    egcur.execute('''
+WITH visible AS (
+SELECT DISTINCT record
+FROM asset.opac_visible_copies aovc
+WHERE circ_lib IN (SELECT id FROM actor.org_unit_descendants(22))
+)
+SELECT bre.id, bre.marc, (bre.create_date at time zone 'UTC')::timestamp, (bre.edit_date at time zone 'UTC')::timestamp
+FROM biblio.record_entry bre
+JOIN visible ON visible.record = bre.id
+WHERE NOT bre.deleted
+AND bre.active
+AND (%s IS NULL OR (bre.edit_date at time zone 'UTC')::timestamp >= %s)
+ORDER BY bre.edit_date ASC, bre.id ASC
+''', (max_update_date, max_update_date))
+    for (bre_id, marc, create_date, edit_date) in egcur:
+        record = ET.fromstring(marc)
+        output = index_record(record)
+        output['create_date'] = create_date
+        output['edit_date'] = edit_date
+        logging.debug(repr(output))
+        insert_to_target(output)
