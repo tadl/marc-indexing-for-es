@@ -41,6 +41,9 @@ indexes = {
     'abstract': {
         'xpath': "//mods32:mods/mods32:abstract",
     },
+    'contents': {
+        'xpath': "//mods32:mods/mods32:tableOfContents",
+    },
     'physical_description': {
         'xpath': "//mods32:mods/mods32:physicalDescription/mods32:extent",
     }
@@ -51,13 +54,13 @@ transform = ET.XSLT(xslt)
 
 def insert_to_target(output):
     try:
-        cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['physical_description']))
+        cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, contents, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['contents'], output['physical_description']))
         conn.commit()
     except psycopg2.IntegrityError:
         logging.warning("Insert failed, deleting then re-inserting")
         conn.rollback()
         cur.execute("DELETE FROM records WHERE id = %s", (output['id'],))
-        cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['physical_description']))
+        cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, contents, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['contents'], output['physical_description']))
         conn.commit()
 
 
