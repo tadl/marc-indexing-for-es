@@ -55,6 +55,30 @@ indexes = {
     },
     'physical_description': {
         'xpath': "//mods32:mods/mods32:physicalDescription/mods32:extent",
+    },
+    'type_of_resource': {
+        'xpath': "//mods32:mods/mods32:typeOfResource",
+    },
+    'publisher': {
+        'xpath': "//mods32:mods/mods32:originInfo/mods32:publisher",
+    },
+    'publisher_location': {
+        'xpath': "//mods32:mods/mods32:originInfo/mods32:place/mods32:placeTerm[@type='text']",
+    },
+    'record_year': {
+        'xpath': "//mods32:mods/mods32:originInfo/mods32:place/mods32:placeTerm[@type='text']",
+    },
+    'isbn': {
+        'xpath': "//mods32:mods/mods32:identifier[@type='isbn']",
+        'array': True
+    },
+    'series': {
+        'xpath': "//mods32:mods/mods32:relatedItem[@type='series']/mods32:titleInfo/mods32:title",
+        'array': True
+    },
+    'links': {
+        'xpath': "//mods32:mods/mods32:identifier[@type='uri']",
+        'array': True
     }
 }
 
@@ -116,7 +140,12 @@ def index_record(record):
         if len(r):
             if post_xpath:
                 r = r[0].xpath(post_xpath)
-            result = ' '.join(r[0].itertext())
+            if 'array' in indexes[index] and indexes[index]['array']:
+                result = []
+                for element in r:
+                    result.append(' '.join(element.itertext()))
+            else:
+                result = ' '.join(r[0].itertext())
         if result:
             output[index] = result
         else:
