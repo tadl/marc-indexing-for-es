@@ -47,7 +47,67 @@ es.indices.put_mapping(
                             "type": "string",
                             "analyzer": "folding",
                         },
+                        "raw": {
+                            "type": "string",
+                            "index": "not_analyzed",
+                            "include_in_all": "false",
+                        },
                     },
+                },
+                'genres': {
+                    'type': 'string',
+                    'fields': {
+                        "raw": {
+                            'type': 'string',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
+                    }
+                },
+                'series': {
+                    'type': 'string',
+                    'fields': {
+                        "raw": {
+                            'type': 'string',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
+                    }
+                },
+                'subjects': {
+                    'type': 'string',
+                    'fields': {
+                        "raw": {
+                            'type': 'string',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
+                    }
+                },
+                'author': {
+                    'type': 'string',
+                    'fields': {
+                        "raw": {
+                            'type': 'string',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
+                    }
+                },
+                'corpauthor': {
+                    'type': 'string',
+                    'fields': {
+                        "raw": {
+                            'type': 'string',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
+                    }
+                },
+                'type_of_resource': {
+                    'type': 'string',
+                    'index': 'not_analyzed',
+                    'include_in_all': 'false',
                 },
                 'holdings': {
                     'properties': {
