@@ -183,6 +183,18 @@ def index_mods(mods):
     return output
 
 
+def index_holdings(rec_id):
+    holdings = []
+
+    # XXX: FIXME: Insert fake holdings data
+    if (int(rec_id) % 2):
+        holdings = [{'barcode': 'barcode' + str(output['id']) + '1234', 'status': 'Available'}, {'barcode': 'barcode' + str(output['id']) + '9876', 'status': 'Checked out'}]
+    else:
+        holdings = [{'barcode': 'barcode' + str(output['id']) + '9876', 'status': 'Checked out'}]
+
+    return holdings
+
+
 if (xml_filename):
     # Index records from XML file
     collection_dom = ET.parse(xml_filename)
@@ -228,10 +240,6 @@ ORDER BY bre.edit_date ASC, bre.id ASC
         output['id'] = bre_id
         output['create_date'] = create_date
         output['edit_date'] = edit_date
-        # XXX: FIXME: Insert fake holdings data
-        if (int(output['id']) % 2):
-            output['holdings'] = [{'barcode': 'barcode' + str(output['id']) + '1234', 'status': 'Available'}, {'barcode': 'barcode' + str(output['id']) + '9876', 'status': 'Checked out'}]
-        else:
-            output['holdings'] = [{'barcode': 'barcode' + str(output['id']) + '9876', 'status': 'Checked out'}]
+        output['holdings'] = index_holdings(bre_id)
         logging.debug(repr(output))
         insert_to_target(output)
