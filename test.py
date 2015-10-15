@@ -155,11 +155,6 @@ def index_record(record):
         logging.info('Setting corpauthor to author')
         output['author'] = output['corpauthor']
 
-    # XXX: FIXME: Insert fake holdings data
-    if (int(output['id']) % 2):
-        output['holdings'] = [{'barcode': 'barcode' + output['id'] + '1234', 'status': 'Available'}, {'barcode': 'barcode' + output['id'] + '9876', 'status': 'Checked out'}]
-    else:
-        output['holdings'] = [{'barcode': 'barcode' + output['id'] + '9876', 'status': 'Checked out'}]
 
     return output
 
@@ -205,5 +200,10 @@ ORDER BY bre.edit_date ASC, bre.id ASC
         output = index_record(record)
         output['create_date'] = create_date
         output['edit_date'] = edit_date
+        # XXX: FIXME: Insert fake holdings data
+        if (int(output['id']) % 2):
+            output['holdings'] = [{'barcode': 'barcode' + str(output['id']) + '1234', 'status': 'Available'}, {'barcode': 'barcode' + str(output['id']) + '9876', 'status': 'Checked out'}]
+        else:
+            output['holdings'] = [{'barcode': 'barcode' + str(output['id']) + '9876', 'status': 'Checked out'}]
         logging.debug(repr(output))
         insert_to_target(output)
