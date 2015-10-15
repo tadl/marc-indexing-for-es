@@ -66,7 +66,7 @@ indexes = {
         'xpath': "//mods32:mods/mods32:originInfo/mods32:place/mods32:placeTerm[@type='text']",
     },
     'record_year': {
-        'xpath': "//mods32:mods/mods32:originInfo/mods32:place/mods32:placeTerm[@type='text']",
+        'xpath': "//mods32:mods/mods32:originInfo/mods32:dateIssued",
     },
     'isbn': {
         'xpath': "//mods32:mods/mods32:identifier[@type='isbn']",
