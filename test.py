@@ -115,19 +115,23 @@ def get_max_update():
     return result[0]
 
 
-def index_record(record):
-    output = {}
+def get_901c(record):
+    id = None
 
     match_901 = record.xpath("marc:datafield[@tag='901']/marc:subfield[@code='c']", namespaces=namespace_dict)
 
     if len(match_901):
-        output['id'] = match_901[0].text
+        id = match_901[0].text
     else:
         logging.error('RECORD HAS NO 901: %s' % record)
 
-    logging.debug('Found record id %s' % output['id'])
+    logging.debug('Found record id %s' % id)
 
-    mods = transform(record)
+    return id
+
+
+def index_mods(mods):
+    output = {}
 
     for index in indexes.keys():
         logging.debug('Indexing %s' % index)
@@ -166,7 +170,9 @@ if (xml_filename):
     collection = collection_dom.getroot()
 
     for record in collection:
-        output = index_record(record)
+        mods = transform(record)
+        output = index_mods(mods)
+        output['id'] = get_901c(record)
         output['create_date'] = None
         output['edit_date'] = None
         insert_to_target(output)
@@ -197,7 +203,9 @@ ORDER BY bre.edit_date ASC, bre.id ASC
 ''', (max_update_date, max_update_date))
     for (bre_id, marc, create_date, edit_date) in egcur:
         record = ET.fromstring(marc)
-        output = index_record(record)
+        mods = transform(record)
+        output = index_mods(mods)
+        output['id'] = bre_id
         output['create_date'] = create_date
         output['edit_date'] = edit_date
         # XXX: FIXME: Insert fake holdings data
