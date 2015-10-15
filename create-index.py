@@ -121,6 +121,21 @@ es.indices.put_mapping(
                             'index': 'not_analyzed',
                             'include_in_all': 'false',
                         },
+                        'circ_lib': {
+                            'type': 'string',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
+                        'call_number': {
+                            'type': 'string',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
+                        'location': {
+                            'type': 'string',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
                     }
                 }
             }
