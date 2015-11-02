@@ -21,12 +21,6 @@ es_index = config['elasticsearch']['index']
 if (es.ping()):
     print "ping!"
 
-dbcfg = config['target_db']
-
-conn = psycopg2.connect(dbname=dbcfg['dbname'], user=dbcfg['user'], password=dbcfg['password'], host=dbcfg['host'], port=dbcfg['port'])
-
-cur = conn.cursor()
-
 xml_filename = None
 xsl_filename = 'MARC21slim2MODS3-2.xsl'
 
@@ -85,19 +79,6 @@ indexes = {
 xslt = ET.parse(xsl_filename)
 transform = ET.XSLT(xslt)
 
-def insert_to_target(output):
-    # XXX: FIXME: Force to Elasticsearch for now
-    return insert_to_elasticsearch(output)
-
-    try:
-        cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, contents, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['contents'], output['physical_description']))
-        conn.commit()
-    except psycopg2.IntegrityError:
-        logging.warning("Insert failed, deleting then re-inserting")
-        conn.rollback()
-        cur.execute("DELETE FROM records WHERE id = %s", (output['id'],))
-        cur.execute("INSERT INTO records (id, created_at, updated_at, title, author, abstract, contents, physical_description) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)", (output['id'], output['create_date'], output['edit_date'], output['title'], output['author'], output['abstract'], output['contents'], output['physical_description']))
-        conn.commit()
 
 def insert_to_elasticsearch(output):
     indexresult = es.index(index=es_index, doc_type='record', id=output['id'], body=output)
@@ -218,7 +199,7 @@ if (xml_filename):
         output['id'] = get_901c(record)
         output['create_date'] = None
         output['edit_date'] = None
-        insert_to_target(output)
+        insert_to_elasticsearch(output)
 else:
     # Index records from database
     egdbcfg = config['evergreen_db']
@@ -253,4 +234,4 @@ ORDER BY bre.edit_date ASC, bre.id ASC
         output['edit_date'] = edit_date
         output['holdings'] = index_holdings(egconn, bre_id)
         logging.debug(repr(output))
-        insert_to_target(output)
+        insert_to_elasticsearch(output)
