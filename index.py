@@ -3,11 +3,12 @@
 # xpath work Based partially on an example from
 # http://stackoverflow.com/a/16699042/157515
 
-import logging, logging.config, configparser
+import logging
+import logging.config
+
+import configparser  # under Python 2, this is a backport
 import lxml.etree as ET
-
 import psycopg2
-
 from elasticsearch import Elasticsearch
 
 logging.config.fileConfig('index-config.ini')
