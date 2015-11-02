@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
-import logging, logging.config, configparser
+import configparser
 
 from elasticsearch import Elasticsearch
 
-logging.config.fileConfig('index-config.ini')
 config = configparser.ConfigParser()
 config.read('index-config.ini')
 
