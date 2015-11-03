@@ -94,17 +94,6 @@ def insert_to_elasticsearch(output):
     logging.debug(repr(indexresult))
 
 
-def get_max_update():
-    # XXX: FIXME: disabled for now
-    return None
-
-    cur.execute("SELECT MAX(updated_at) FROM records;")
-    result = cur.fetchone()
-    max_update = result[0]
-    logging.debug('Max update is %s' % max_update)
-    return result[0]
-
-
 def get_subjects(mods):
     subjects = []
     matches = mods.xpath("//mods32:mods/mods32:subject/mods32:topic", namespaces=namespace_dict)
@@ -202,9 +191,36 @@ def get_db_conn():
     return conn
 
 
-def full_index(egconn):
+def load_full_state():
+    conf = configparser.ConfigParser()
+    conf.read('index-state.ini')
+    return {
+        'start_date': conf.get('full', 'start_date', fallback=None),
+        'in_progress': conf.getboolean('full', 'in_progress', fallback=False),
+        'last_edit_date': conf.get('full', 'last_edit_date', fallback=None),
+        'last_id': conf.getint('full', 'last_id', fallback=0)
+    }
+
+
+def set_state(section, key, value):
+    conf = configparser.ConfigParser()
+    conf.read('index-state.ini')
+    if (section not in conf):
+        conf.add_section(section)
+    if (value is None):
+        conf.remove_option(section, key)
+    else:
+        conf.set(section, key, str(value))
+    with open('index-state.ini', 'w') as f:
+        conf.write(f)
+
+
+def full_index_page(egconn, state):
     egcur = egconn.cursor()
-    max_update_date = get_max_update()
+    index_count = 0
+    last_edit_date = state['last_edit_date']
+    last_id = state['last_id']
+
     egcur.execute('''
 WITH visible AS (
 SELECT record
@@ -219,12 +235,28 @@ AND NOT acn.deleted
 SELECT bre.id, bre.marc, bre.create_date, bre.edit_date
 FROM biblio.record_entry bre
 JOIN visible ON visible.record = bre.id
-WHERE NOT bre.deleted
-AND bre.active
-AND (%s IS NULL OR bre.edit_date >= %s)
+WHERE (
+    NOT bre.deleted
+    AND bre.active
+    AND (
+        %(last_edit_date)s IS NULL
+        OR (
+            bre.edit_date >= %(last_edit_date)s
+            AND bre.id > %(last_id)s
+        )
+        OR bre.edit_date > %(last_edit_date)s
+    )
+)
 ORDER BY bre.edit_date ASC, bre.id ASC
-''', (max_update_date, max_update_date))
+LIMIT 1000
+''', {'last_edit_date': last_edit_date, 'last_id': last_id})
+
+    # Clear last_edit_date, last_id
+    state['last_edit_date'] = None
+    state['last_id'] = None
+
     for (bre_id, marc, create_date, edit_date) in egcur:
+        index_count += 1
         record = ET.fromstring(marc)
         mods = transform(record)
         output = index_mods(mods)
@@ -234,6 +266,47 @@ ORDER BY bre.edit_date ASC, bre.id ASC
         output['holdings'] = index_holdings(egconn, bre_id)
         logging.debug(repr(output))
         insert_to_elasticsearch(output)
+        # Update state vars -- the most recent value of these will be
+        # written to the state file after the current loop completes
+        state['last_edit_date'] = edit_date
+        state['last_id'] = bre_id
+    return index_count, state
+
+
+def full_index(egconn):
+    state = load_full_state()
+    if (state['in_progress'] != True):
+        logging.info('STARTING NEW full indexing run')
+        egcur = egconn.cursor()
+        egcur.execute("SELECT NOW();")
+        full_start_date = egcur.fetchone()[0]
+        logging.info("Full index start time is %s" % (full_start_date,))
+        set_state('full', 'start_date', full_start_date)
+        set_state('full', 'in_progress', True)
+        set_state('full', 'last_edit_date', None)
+        set_state('full', 'last_id', None)
+    else:
+        logging.info('RESUMING EXISTING full indexing run')
+    logging.info("Retreived state: " + repr(state))
+    # Index a "page" of records at a time
+    # loop while number of records indexed != 0
+    indexed_count = None
+    while (indexed_count != 0):
+        (indexed_count, state) = full_index_page(egconn, state)
+        logging.info('indexed %s records ending with date %s id %s'
+                     % (indexed_count, state['last_edit_date'],
+                        state['last_id']))
+        # Write state vars to state file -- supports resuming a full
+        # index run
+        set_state('full', 'last_edit_date', state['last_edit_date'])
+        set_state('full', 'last_id', state['last_id'])
+        # Rollback transaction
+        egconn.rollback()
+    # if number of records is zero, we are no longer "in progress"
+    set_state('full', 'in_progress', None)
+    set_state('full', 'last_edit_date', None)
+    set_state('full', 'last_id', None)
+    logging.info("DONE!")
 
 
 def incremental_index(egconn):
