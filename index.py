@@ -20,7 +20,7 @@ es = Elasticsearch([config['elasticsearch']['url']])
 es_index = config['elasticsearch']['index']
 
 if (es.ping()):
-    print "ping!"
+    print("ping!")
 
 xml_filename = None
 xsl_filename = 'MARC21slim2MODS3-2.xsl'
@@ -131,7 +131,7 @@ def get_901c(record):
 def index_mods(mods):
     output = {}
 
-    for index in indexes.keys():
+    for index in list(indexes.keys()):
         logging.debug('Indexing %s' % index)
         xpath = indexes[index]['xpath']
         post_xpath = None
