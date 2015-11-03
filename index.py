@@ -162,7 +162,7 @@ def index_mods(mods):
             output[index] = ''
 
     if (output['author'] == ''):
-        logging.info('Setting corpauthor to author')
+        logging.debug('Setting corpauthor to author')
         output['author'] = output['corpauthor']
 
     output['subjects'] = get_subjects(mods)
