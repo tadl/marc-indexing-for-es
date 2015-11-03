@@ -99,7 +99,6 @@ def get_max_update():
 
 def get_subjects(mods):
     subjects = []
-    mods = transform(record)
     matches = mods.xpath("//mods32:mods/mods32:subject/mods32:topic", namespaces=namespace_dict)
     for match in matches:
         subjects.append(' '.join(match.itertext()))
@@ -108,7 +107,6 @@ def get_subjects(mods):
 
 def get_genres(mods):
     genres = []
-    mods = transform(record)
     matches = mods.xpath("//mods32:mods/mods32:genre", namespaces=namespace_dict)
     for match in matches:
         genres.append(' '.join(match.itertext()))
@@ -159,8 +157,8 @@ def index_mods(mods):
         logging.info('Setting corpauthor to author')
         output['author'] = output['corpauthor']
 
-        output['subjects'] = get_subjects(mods)
-        output['genres'] = get_genres(mods)
+    output['subjects'] = get_subjects(mods)
+    output['genres'] = get_genres(mods)
 
     return output
 
