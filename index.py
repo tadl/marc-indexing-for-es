@@ -202,6 +202,16 @@ def load_full_state():
     }
 
 
+def load_incremental_state():
+    conf = configparser.ConfigParser()
+    conf.read('index-state.ini')
+    return {
+        'last_edit_date': conf.get('incremental', 'last_edit_date',
+                                   fallback=None),
+        'last_id': conf.getint('incremental', 'last_id', fallback=0),
+    }
+
+
 def set_state(section, key, value):
     conf = configparser.ConfigParser()
     conf.read('index-state.ini')
@@ -306,12 +316,105 @@ def full_index(egconn):
     set_state('full', 'in_progress', None)
     set_state('full', 'last_edit_date', None)
     set_state('full', 'last_id', None)
+    newstate = load_full_state()
+    set_state('incremental', 'last_edit_date', newstate['start_date'])
+    set_state('incremental', 'last_id', 0)
     logging.info("DONE!")
 
 
+def incremental_index_page(egconn, state):
+    egcur = egconn.cursor()
+    index_count = 0
+    last_edit_date = state['last_edit_date']
+    last_id = state['last_id']
+
+    egcur.execute('''
+SELECT bre.id, bre.marc, bre.create_date, bre.edit_date,
+    GREATEST(MAX(bre.edit_date), MAX(acn.edit_date), MAX(acp.edit_date)) AS
+    last_edit_date
+FROM biblio.record_entry bre
+LEFT JOIN asset.call_number acn ON bre.id = acn.record
+LEFT JOIN asset.copy acp ON acp.call_number = acn.id
+WHERE (
+    acp.circ_lib IN (SELECT id FROM actor.org_unit_descendants(22))
+    OR acn.owning_lib IN (SELECT id FROM actor.org_unit_descendants(22))
+)
+AND (
+    bre.edit_date >= %(last_edit_date)s
+    OR acn.edit_date >= %(last_edit_date)s
+    OR acp.edit_date >= %(last_edit_date)s
+)
+GROUP BY bre.id, bre.marc, bre.create_date, bre.edit_date
+ORDER BY GREATEST(
+    MAX(bre.edit_date), MAX(acn.edit_date), MAX(acp.edit_date)
+) ASC, bre.id ASC
+LIMIT 1000
+''', {'last_edit_date': last_edit_date, 'last_id': last_id})
+
+    # Clear last_edit_date, last_id
+    state['last_edit_date'] = None
+    state['last_id'] = None
+
+    for (bre_id, marc, create_date, edit_date, last_edit_date) in egcur:
+        logging.info("bib %s last_edit_date %s" % (bre_id, last_edit_date))
+        index_count += 1
+        record = ET.fromstring(marc)
+        mods = transform(record)
+        output = index_mods(mods)
+        output['id'] = bre_id
+        output['create_date'] = create_date
+        output['edit_date'] = edit_date
+        output['holdings'] = index_holdings(egconn, bre_id)
+        logging.debug(repr(output))
+        insert_to_elasticsearch(output)
+        # Update state vars -- the most recent value of these will be
+        # written to the state file after the current loop completes
+        state['last_edit_date'] = last_edit_date
+        state['last_id'] = bre_id
+    return index_count, state
+
+
 def incremental_index(egconn):
-    print("Incremental not supported yet.")
-    sys.exit(1)
+    # For incremental, we must have:
+    #  - a last_edit_date
+    #  - a last_id
+    # If this is our first incremental, the last_edit_date
+    # will be the start_date of the full index run
+    # This way, we will pick up any changes that happened during the full
+    # index run
+    # Our full index must not be in progress
+    full_state = load_full_state()
+    if (full_state['in_progress']):
+        logging.error("Cannot perform incremental index while full index is "
+                      "in a state of in_progress")
+        sys.exit(1)
+    state = load_incremental_state()
+    logging.info("Loaded state " + repr(state))
+    # Index a "page" of records at a time
+    # loop while number of records indexed != 0
+    indexed_count = None
+    while (indexed_count != 0):
+        (indexed_count, state) = incremental_index_page(egconn, state)
+        logging.info('indexed %s records ending with date %s id %s'
+                     % (indexed_count, state['last_edit_date'],
+                        state['last_id']))
+        # Write state vars to state file -- supports resuming an
+        # incremental index run
+        set_state('incremental', 'last_edit_date', state['last_edit_date'])
+        set_state('incremental', 'last_id', state['last_id'])
+        # Rollback transaction
+        egconn.rollback()
+        # When the library is open, we will almost always have
+        # updated records every time we loop through this query
+        #
+        # Once we've gotten most of the records, leave the rest for
+        # our next --incremental pass
+        if (indexed_count < 10):
+            # TODO: We should also compare the last_edit_date with
+            # the current time
+            indexed_count = 0
+    # if number of records is zero, we are done for this run
+    logging.info("DONE with incremental!")
 
 
 if (xml_filename):
