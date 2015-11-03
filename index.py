@@ -3,13 +3,21 @@
 # xpath work Based partially on an example from
 # http://stackoverflow.com/a/16699042/157515
 
+import argparse
 import logging
 import logging.config
+import sys
 
 import configparser  # under Python 2, this is a backport
 import lxml.etree as ET
 import psycopg2
 from elasticsearch import Elasticsearch
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--full', action='store_true')
+parser.add_argument('--incremental', action='store_true')
+
+args = parser.parse_args()
 
 logging.config.fileConfig('index-config.ini')
 config = configparser.ConfigParser()
@@ -186,23 +194,15 @@ WHERE acn.record = %s
     return holdings
 
 
-if (xml_filename):
-    # Index records from XML file
-    collection_dom = ET.parse(xml_filename)
+def get_db_conn():
+    dbcfg = config['evergreen_db']
+    conn = psycopg2.connect(dbname=dbcfg['dbname'], user=dbcfg['user'],
+                            password=dbcfg['password'], host=dbcfg['host'],
+                            port=dbcfg['port'])
+    return conn
 
-    collection = collection_dom.getroot()
 
-    for record in collection:
-        mods = transform(record)
-        output = index_mods(mods)
-        output['id'] = get_901c(record)
-        output['create_date'] = None
-        output['edit_date'] = None
-        insert_to_elasticsearch(output)
-else:
-    # Index records from database
-    egdbcfg = config['evergreen_db']
-    egconn = psycopg2.connect(dbname=egdbcfg['dbname'], user=egdbcfg['user'], password=egdbcfg['password'], host=egdbcfg['host'], port=egdbcfg['port'])
+def full_index(egconn):
     egcur = egconn.cursor()
     max_update_date = get_max_update()
     egcur.execute('''
@@ -234,3 +234,33 @@ ORDER BY bre.edit_date ASC, bre.id ASC
         output['holdings'] = index_holdings(egconn, bre_id)
         logging.debug(repr(output))
         insert_to_elasticsearch(output)
+
+
+def incremental_index(egconn):
+    print("Incremental not supported yet.")
+    sys.exit(1)
+
+
+if (xml_filename):
+    # Index records from XML file
+    collection_dom = ET.parse(xml_filename)
+
+    collection = collection_dom.getroot()
+
+    for record in collection:
+        mods = transform(record)
+        output = index_mods(mods)
+        output['id'] = get_901c(record)
+        output['create_date'] = None
+        output['edit_date'] = None
+        insert_to_elasticsearch(output)
+else:
+    # Index records from database
+    egconn = get_db_conn()
+    if (args.full):
+        full_index(egconn)
+    elif (args.incremental):
+        incremental_index(egconn)
+    else:
+        print("Must specify one of incremental or full")
+        sys.exit(1)
