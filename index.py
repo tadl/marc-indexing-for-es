@@ -393,7 +393,7 @@ def incremental_index(egconn):
     # Index a "page" of records at a time
     # loop while number of records indexed != 0
     indexed_count = None
-    while (indexed_count != 0):
+    while (indexed_count is None) or (indexed_count == 1000):
         (indexed_count, state) = incremental_index_page(egconn, state)
         logging.info('indexed %s records ending with date %s id %s'
                      % (indexed_count, state['last_edit_date'],
@@ -404,16 +404,8 @@ def incremental_index(egconn):
         set_state('incremental', 'last_id', state['last_id'])
         # Rollback transaction
         egconn.rollback()
-        # When the library is open, we will almost always have
-        # updated records every time we loop through this query
-        #
-        # Once we've gotten most of the records, leave the rest for
-        # our next --incremental pass
-        if (indexed_count < 10):
-            # TODO: We should also compare the last_edit_date with
-            # the current time
-            indexed_count = 0
-    # if number of records is zero, we are done for this run
+    # if we get a "page" that contains fewer records than the LIMIT count,
+    # we are done for this run
     logging.info("DONE with incremental!")
 
 
