@@ -166,7 +166,9 @@ def index_holdings(conn, rec_id):
     cur = conn.cursor()
 
     cur.execute('''
-SELECT acp.id AS copy_id, acp.barcode, ccs.name AS status, aou.shortname AS circ_lib, acl.name AS location, acn.label AS call_number
+SELECT acp.id AS copy_id, acp.barcode, ccs.name AS status,
+    aou.shortname AS circ_lib, acl.id AS location_id,
+    acl.name AS location, acn.label AS call_number
 FROM asset.copy acp
 JOIN config.copy_status ccs ON acp.status = ccs.id
 JOIN asset.copy_location acl ON acp.location = acl.id
@@ -176,9 +178,15 @@ JOIN asset.opac_visible_copies aovc ON acp.id = aovc.copy_id
 WHERE acn.record = %s
 ''', (rec_id,))
 
-    for (copy_id, barcode, status, circ_lib, location, call_number) in cur:
-        logging.debug([copy_id, barcode, status, circ_lib, location, call_number])
-        holdings.append({'barcode': barcode, 'status': status, 'circ_lib': circ_lib, 'location': location, 'call_number': call_number})
+    for (copy_id, barcode, status, circ_lib, location_id, location,
+         call_number) in cur:
+        logging.debug(
+            [copy_id, barcode, status, circ_lib, location_id, location,
+             call_number])
+        holdings.append(
+            {'barcode': barcode, 'status': status,
+             'circ_lib': circ_lib, 'location_id': location_id,
+             'location': location, 'call_number': call_number})
 
     return holdings
 

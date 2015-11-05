@@ -130,6 +130,11 @@ es.indices.put_mapping(
                             'index': 'not_analyzed',
                             'include_in_all': 'false',
                         },
+                        'location_id': {
+                            'type': 'integer',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
                         'location': {
                             'type': 'string',
                             'index': 'not_analyzed',
