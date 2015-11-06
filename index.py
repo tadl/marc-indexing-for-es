@@ -102,7 +102,10 @@ def insert_to_elasticsearch(output):
 
 def get_subjects(mods):
     subjects = []
-    matches = mods.xpath("//mods32:mods/mods32:subject/mods32:topic", namespaces=namespace_dict)
+    matches = mods.xpath(
+        "//mods32:mods/mods32:subject[mods32:geographic or mods32:name "
+        "or mods32:temporal or mods32:topic]",
+        namespaces=namespace_dict)
     for match in matches:
         subjects.append(' '.join(match.itertext()))
     return subjects
