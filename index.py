@@ -7,6 +7,7 @@ import argparse
 import logging
 import logging.config
 import sys
+import time
 
 import configparser  # under Python 2, this is a backport
 import lxml.etree as ET
@@ -319,10 +320,17 @@ def full_index(egconn):
     # loop while number of records indexed != 0
     indexed_count = None
     while (indexed_count != 0):
+        start_time = time.time()
         (indexed_count, state) = full_index_page(egconn, state)
-        logging.info('indexed %s records ending with date %s id %s'
-                     % (indexed_count, state['last_edit_date'],
-                        state['last_id']))
+        time_taken = time.time() - start_time
+        if (time_taken > 0):
+            time_recs_sec = indexed_count / time_taken
+        else:
+            time_recs_sec = 0
+        logging.info('indexed %s records in %.0fs (~%.3f rec/s) '
+                     'ending with date %s id %s'
+                     % (indexed_count, time_taken, time_recs_sec,
+                        state['last_edit_date'], state['last_id']))
         # Write state vars to state file -- supports resuming a full
         # index run
         set_state('full', 'last_edit_date', state['last_edit_date'])
