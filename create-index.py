@@ -53,6 +53,21 @@ es.indices.put_mapping(
                         },
                     },
                 },
+                'title_short': {
+                    'type': 'string',
+                    'analyzer': 'english',
+                    'fields': {
+                        "folded": {
+                            "type": "string",
+                            "analyzer": "folding",
+                        },
+                        "raw": {
+                            "type": "string",
+                            "index": "not_analyzed",
+                            "include_in_all": "false",
+                        },
+                    },
+                },
                 'genres': {
                     'type': 'string',
                     'fields': {

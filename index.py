@@ -101,6 +101,19 @@ def insert_to_elasticsearch(output):
     logging.debug(repr(indexresult))
 
 
+def get_title_short(mods):
+    titles = mods.xpath(
+        "//mods32:mods/mods32:titleInfo[mods32:title and not (@type)]",
+        namespaces=namespace_dict)
+    first_title = titles[0]
+    components = first_title.xpath(
+        ".//*[local-name()='nonSort' or local-name()='title']",
+        namespaces=namespace_dict)
+    parts = []
+    for component in components:
+        parts.append(component.text)
+    return ''.join(parts)
+
 def get_subjects(mods):
     subjects = []
     matches = mods.xpath(
@@ -164,6 +177,7 @@ def index_mods(mods):
         logging.debug('Setting corpauthor to author')
         output['author'] = output['corpauthor']
 
+    output['title_short'] = get_title_short(mods)
     output['subjects'] = get_subjects(mods)
     output['genres'] = get_genres(mods)
 
