@@ -50,6 +50,12 @@ indexes = {
         'xpath': "//mods32:mods/mods32:name[@type='corporate' and (mods32:role/mods32:roleTerm[text()='creator'] or mods32:role/mods32:roleTerm[text()='aut'] or mods32:role/mods32:roleTerm[text()='cre'])]",
         'post_xpath': "//*[local-name()='namePart']"
     },
+    'author_other': {
+        'xpath':
+            "//mods32:mods/mods32:name[@type='personal' and not(mods32:role/mods32:roleTerm[text()='creator'])]",
+        'post_xpath': "//*[local-name()='namePart']",
+        'array': True
+    },
     'abstract': {
         'xpath': "//mods32:mods/mods32:abstract",
     },

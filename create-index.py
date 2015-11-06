@@ -93,6 +93,16 @@ es.indices.put_mapping(
                         },
                     }
                 },
+                'author_other': {
+                    'type': 'string',
+                    'fields': {
+                        "raw": {
+                            'type': 'string',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
+                    }
+                },
                 'corpauthor': {
                     'type': 'string',
                     'fields': {
