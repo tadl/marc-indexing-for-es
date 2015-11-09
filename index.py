@@ -142,7 +142,11 @@ def get_titles_misc(mods):
     titles = mods.xpath(
         "//mods32:mods/mods32:titleInfo[mods32:title and not (@type)]",
         namespaces=namespace_dict)
-    first_title = titles[0]
+    if (len(titles)):
+        first_title = titles[0]
+    else:
+        logging.warn('No title matches')
+        return ('', '')
     non_sort_match = first_title.xpath(
         ".//*[local-name()='nonSort']",
         namespaces=namespace_dict)
