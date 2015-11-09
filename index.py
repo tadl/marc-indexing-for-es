@@ -149,13 +149,16 @@ def get_titles_misc(mods):
     title_match = first_title.xpath(
         ".//*[local-name()='title']",
         namespaces=namespace_dict)
-    if (len(non_sort_match)):
+    if (len(non_sort_match) and non_sort_match[0].text):
         title_short = non_sort_match[0].text
     else:
         title_short = ''
-    if (len(title_match)):
+    if (len(title_match) and title_match[0].text):
         title_short = title_short + title_match[0].text
         title_nonfiling = title_match[0].text
+    else:
+        logging.warn('No value found for title_nonfiling')
+        title_nonfiling = ''
     return (title_short, title_nonfiling)
 
 
