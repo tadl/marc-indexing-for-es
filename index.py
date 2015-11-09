@@ -127,7 +127,8 @@ def get_title_display(record):
                 if (match):
                     title_parts.append(match.group(0))
             else:
-                title_parts.append(subfield.text)
+                if (subfield.text):
+                    title_parts.append(subfield.text)
         title_display = ' '.join(title_parts)
         # Strip trailing punctuation from title
         title_display = re.sub('\s*[:;/]\s*$', '', title_display)
