@@ -114,21 +114,21 @@ def get_title_display(record):
         for subfield in title_match:
             code = subfield.get("code")
             value = subfield.text
-            if code == 'a':
-                title_parts.append(subfield.text)
-            elif code == 'b':
-                title_parts.append(subfield.text)
-            elif code == 'c':
-                # omit
-                pass
-            elif code == 'h':
-                # include only trailing punctuation
-                match = re.search('([:;/])\s*$', subfield.text)
-                if (match):
-                    title_parts.append(match.group(0))
-            else:
-                if (subfield.text):
-                    title_parts.append(subfield.text)
+            if value:
+                if code == 'a':
+                    title_parts.append(value)
+                elif code == 'b':
+                    title_parts.append(value)
+                elif code == 'c':
+                    # omit
+                    pass
+                elif code == 'h':
+                    # include only trailing punctuation
+                    match = re.search('([:;/])\s*$', value)
+                    if (match):
+                        title_parts.append(match.group(0))
+                else:
+                    title_parts.append(value)
         title_display = ' '.join(title_parts)
         # Strip trailing punctuation from title
         title_display = re.sub('\s*[:;/]\s*$', '', title_display)
