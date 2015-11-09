@@ -42,7 +42,7 @@ es.indices.put_mapping(
     body={
         'record': {
             'properties': {
-                'title': {
+                'title_display': {
                     'type': 'string',
                     'analyzer': 'english',
                     'fields': {
@@ -57,13 +57,32 @@ es.indices.put_mapping(
                         },
                     },
                 },
-                'title_short': {
+                'title': {
                     'type': 'string',
                     'analyzer': 'english',
+                    'include_in_all': 'false',
                     'fields': {
                         "folded": {
                             "type": "string",
                             "analyzer": "folding",
+                            'include_in_all': 'false',
+                        },
+                        "raw": {
+                            "type": "string",
+                            "index": "not_analyzed",
+                            "include_in_all": "false",
+                        },
+                    },
+                },
+                'title_short': {
+                    'type': 'string',
+                    'analyzer': 'english',
+                    'include_in_all': 'false',
+                    'fields': {
+                        "folded": {
+                            "type": "string",
+                            "analyzer": "folding",
+                            'include_in_all': 'false',
                         },
                         "raw": {
                             "type": "string",
