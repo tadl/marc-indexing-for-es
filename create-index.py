@@ -22,6 +22,10 @@ es.indices.create(
             'number_of_replicas': 1,
             'analysis': {
                 'analyzer': {
+                    'ducet_sort': {
+                        'tokenizer': 'keyword',
+                        'filter': 'icu_collation',
+                    },
                     'folding': {
                         'filter': ['lowercase', 'asciifolding'],
                         'tokenizer': 'standard',
@@ -65,6 +69,23 @@ es.indices.put_mapping(
                             "type": "string",
                             "index": "not_analyzed",
                             "include_in_all": "false",
+                        },
+                    },
+                },
+                'title_nonfiling': {
+                    'type': 'string',
+                    'analyzer': 'english',
+                    'include_in_all': 'false',
+                    'fields': {
+                        'folded': {
+                            'type': 'string',
+                            'analyzer': 'folding',
+                            'include_in_all': 'false',
+                        },
+                        'sort': {
+                            'type': 'string',
+                            'analyzer': 'ducet_sort',
+                            'include_in_all': 'false',
                         },
                     },
                 },

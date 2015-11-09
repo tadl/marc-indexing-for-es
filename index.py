@@ -6,6 +6,7 @@
 import argparse
 import logging
 import logging.config
+import re
 import sys
 import time
 
@@ -101,18 +102,58 @@ def insert_to_elasticsearch(output):
     logging.debug(repr(indexresult))
 
 
-def get_title_short(mods):
+def get_title_display(record):
+    title_match = record.xpath('//*[@tag="245"]/*[@code]',
+                               namespaces=namespace_dict)
+    if (len(title_match)):
+        title_parts = []
+        for subfield in title_match:
+            code = subfield.get("code")
+            value = subfield.text
+            if code == 'a':
+                title_parts.append(subfield.text)
+            elif code == 'b':
+                title_parts.append(subfield.text)
+            elif code == 'c':
+                # omit
+                pass
+            elif code == 'h':
+                # include only trailing punctuation
+                match = re.search('([:;/])\s*$', subfield.text)
+                if (match):
+                    title_parts.append(match.group(0))
+            else:
+                title_parts.append(subfield.text)
+        title_display = ' '.join(title_parts)
+        # Strip trailing punctuation from title
+        title_display = re.sub('\s*[:;/]\s*$', '', title_display)
+        return title_display
+    else:
+        logging.warn('Found no title for record.')
+
+def get_titles_misc(mods):
+    # We'd like to return two things:
+    # title_short
+    # title_nonfiling
     titles = mods.xpath(
         "//mods32:mods/mods32:titleInfo[mods32:title and not (@type)]",
         namespaces=namespace_dict)
     first_title = titles[0]
-    components = first_title.xpath(
-        ".//*[local-name()='nonSort' or local-name()='title']",
+    non_sort_match = first_title.xpath(
+        ".//*[local-name()='nonSort']",
         namespaces=namespace_dict)
-    parts = []
-    for component in components:
-        parts.append(component.text)
-    return ''.join(parts)
+    title_match = first_title.xpath(
+        ".//*[local-name()='title']",
+        namespaces=namespace_dict)
+    if (len(non_sort_match)):
+        title_short = non_sort_match[0].text
+    else:
+        title_short = ''
+    if (len(title_match)):
+        title_short = title_short + title_match[0].text
+        title_nonfiling = title_match[0].text
+    return (title_short, title_nonfiling)
+
 
 def get_subjects(mods):
     subjects = []
@@ -177,7 +218,7 @@ def index_mods(mods):
         logging.debug('Setting corpauthor to author')
         output['author'] = output['corpauthor']
 
-    output['title_short'] = get_title_short(mods)
+    (output['title_short'], output['title_nonfiling']) = get_titles_misc(mods)
     output['subjects'] = get_subjects(mods)
     output['genres'] = get_genres(mods)
 
@@ -302,6 +343,7 @@ LIMIT 1000
         record = ET.fromstring(marc)
         mods = transform(record)
         output = index_mods(mods)
+        output['title_display'] = get_title_display(record)
         output['id'] = bre_id
         output['create_date'] = create_date
         output['edit_date'] = edit_date
@@ -400,6 +442,7 @@ LIMIT 1000
         record = ET.fromstring(marc)
         mods = transform(record)
         output = index_mods(mods)
+        output['title_display'] = get_title_display(record)
         output['id'] = bre_id
         output['create_date'] = create_date
         output['edit_date'] = edit_date
@@ -457,6 +500,7 @@ if (xml_filename):
     for record in collection:
         mods = transform(record)
         output = index_mods(mods)
+        output['title_display'] = get_title_display(record)
         output['id'] = get_901c(record)
         output['create_date'] = None
         output['edit_date'] = None
