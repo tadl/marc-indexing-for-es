@@ -79,6 +79,9 @@ indexes = {
     'record_year': {
         'xpath': "//mods32:mods/mods32:originInfo/mods32:dateIssued",
     },
+    'sort_year': {
+        'xpath': "//mods32:mods/mods32:originInfo/mods32:dateIssued[@encoding='marc']",
+    },
     'isbn': {
         'xpath': "//mods32:mods/mods32:identifier[@type='isbn']",
         'array': True

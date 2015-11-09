@@ -89,6 +89,11 @@ es.indices.put_mapping(
                         },
                     },
                 },
+                'sort_year': {
+                        "type": "integer",
+                        "index": "not_analyzed",
+                        "include_in_all": "false",
+                },
                 'genres': {
                     'type': 'string',
                     'fields': {
