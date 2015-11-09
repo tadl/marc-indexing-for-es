@@ -81,6 +81,7 @@ indexes = {
     },
     'sort_year': {
         'xpath': "//mods32:mods/mods32:originInfo/mods32:dateIssued[@encoding='marc']",
+        'validation': '^\d+$',
     },
     'isbn': {
         'xpath': "//mods32:mods/mods32:identifier[@type='isbn']",
@@ -213,7 +214,12 @@ def index_mods(mods):
             else:
                 result = ' '.join(r[0].itertext())
         if result:
-            output[index] = result
+            if 'validation' in indexes[index]:
+                pattern = indexes[index]['validation']
+                if re.search(pattern, result):
+                    output[index] = result
+            else:
+                output[index] = result
         else:
             output[index] = ''
 
