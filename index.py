@@ -449,10 +449,6 @@ ORDER BY GREATEST(
 LIMIT 1000
 ''', {'last_edit_date': last_edit_date, 'last_id': last_id})
 
-    # Clear last_edit_date, last_id
-    state['last_edit_date'] = None
-    state['last_id'] = None
-
     for (bre_id, marc, create_date, edit_date, last_edit_date) in egcur:
         logging.info("bib %s last_edit_date %s" % (bre_id, last_edit_date))
         index_count += 1
