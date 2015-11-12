@@ -438,9 +438,19 @@ WHERE (
     OR acn.owning_lib IN (SELECT id FROM actor.org_unit_descendants(22))
 )
 AND (
-    bre.edit_date >= %(last_edit_date)s
-    OR acn.edit_date >= %(last_edit_date)s
-    OR acp.edit_date >= %(last_edit_date)s
+    (
+        (
+            bre.edit_date >= %(last_edit_date)s
+            OR acn.edit_date >= %(last_edit_date)s
+            OR acp.edit_date >= %(last_edit_date)s
+        )
+        AND bre.id > %(last_id)s
+    )
+    OR (
+        bre.edit_date > %(last_edit_date)s
+        OR acn.edit_date > %(last_edit_date)s
+        OR acp.edit_date > %(last_edit_date)s
+    )
 )
 GROUP BY bre.id, bre.marc, bre.create_date, bre.edit_date
 ORDER BY GREATEST(
