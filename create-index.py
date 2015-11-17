@@ -213,6 +213,12 @@ es.indices.put_mapping(
                             'index': 'not_analyzed',
                             'include_in_all': 'false',
                         },
+                        'due_date': {
+                            'type': 'date',
+                            'format': 'yyyy-MM-dd',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
                     }
                 }
             }
