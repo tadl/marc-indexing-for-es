@@ -283,6 +283,45 @@ WHERE acn.record = %s
     return holdings
 
 
+def index_many_holdings(conn, record_ids):
+    holdings_dict = {}
+    holdings_count = 0
+
+    cur = conn.cursor()
+
+    cur.execute('''
+SELECT acp.id AS copy_id, acp.barcode, ccs.name AS status,
+    aou.shortname AS circ_lib, acl.id AS location_id,
+    acl.name AS location, acn.label AS call_number,
+    ocirc.due_date::DATE, acn.record
+FROM asset.copy acp
+JOIN config.copy_status ccs ON acp.status = ccs.id
+JOIN asset.copy_location acl ON acp.location = acl.id
+JOIN actor.org_unit aou ON acp.circ_lib = aou.id
+JOIN asset.call_number acn ON acp.call_number = acn.id
+JOIN asset.opac_visible_copies aovc ON acp.id = aovc.copy_id
+LEFT JOIN action.open_circulation ocirc ON ocirc.target_copy = acp.id
+WHERE acn.record = ANY(%s::BIGINT[])
+''', (record_ids,))
+
+    for (copy_id, barcode, status, circ_lib, location_id, location,
+         call_number, due_date, record) in cur:
+        holdings_count += 1
+        logging.debug(
+            [copy_id, barcode, status, circ_lib, location_id, location,
+             call_number, due_date, record])
+        if record not in holdings_dict:
+            holdings_dict[record] = []
+        holdings_dict[record].append(
+            {'barcode': barcode, 'status': status,
+             'circ_lib': circ_lib, 'location_id': location_id,
+             'location': location, 'call_number': call_number,
+             'due_date': due_date})
+    logging.info('Fetched %s holdings.' % (holdings_count,))
+    logging.debug(holdings_dict)
+    return holdings_dict
+
+
 def get_db_conn():
     dbcfg = config['evergreen_db']
     conn = psycopg2.connect(dbname=dbcfg['dbname'], user=dbcfg['user'],
@@ -365,7 +404,16 @@ LIMIT 1000
     state['last_edit_date'] = None
     state['last_id'] = None
 
-    for (bre_id, marc, create_date, edit_date) in egcur:
+    results = egcur.fetchall()
+
+    # Get just the record IDs
+    record_ids = []
+    for result in results:
+        record_ids.append(result[0])
+
+    holdings = index_many_holdings(egconn, record_ids)
+
+    for (bre_id, marc, create_date, edit_date) in results:
         index_count += 1
         record = ET.fromstring(marc)
         mods = transform(record)
@@ -374,7 +422,10 @@ LIMIT 1000
         output['id'] = bre_id
         output['create_date'] = create_date
         output['edit_date'] = edit_date
-        output['holdings'] = index_holdings(egconn, bre_id)
+        if bre_id in holdings:
+            output['holdings'] = holdings[bre_id]
+        else:
+            output['holdings'] = []
         logging.debug(repr(output))
         insert_to_elasticsearch(output)
         # Update state vars -- the most recent value of these will be
