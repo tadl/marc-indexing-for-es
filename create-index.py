@@ -182,6 +182,7 @@ es.indices.put_mapping(
                     'include_in_all': 'false',
                 },
                 'holdings': {
+                    'type': 'nested',
                     'properties': {
                         'barcode': {
                             'type': 'string',
