@@ -261,28 +261,30 @@ def index_holdings(conn, record_ids):
     cur.execute('''
 SELECT acn.record, acp.id AS copy_id, acp.barcode, ccs.name AS status,
     aou.shortname AS circ_lib, acl.id AS location_id,
-    acl.name AS location, acn.label AS call_number
+    acl.name AS location, acn.label AS call_number, ocirc.due_date::DATE
 FROM asset.copy acp
 JOIN config.copy_status ccs ON acp.status = ccs.id
 JOIN asset.copy_location acl ON acp.location = acl.id
 JOIN actor.org_unit aou ON acp.circ_lib = aou.id
 JOIN asset.call_number acn ON acp.call_number = acn.id
 JOIN asset.opac_visible_copies aovc ON acp.id = aovc.copy_id
+LEFT JOIN action.open_circulation ocirc ON ocirc.target_copy = acp.id
 WHERE acn.record = ANY(%s::BIGINT[])
 ''', (record_ids,))
 
     for (record, copy_id, barcode, status, circ_lib, location_id, location,
-         call_number) in cur:
+         call_number, due_date) in cur:
         holdings_count += 1
         logging.debug(
             [record, copy_id, barcode, status, circ_lib, location_id, location,
-             call_number])
+             call_number, due_date])
         if record not in holdings_dict:
             holdings_dict[record] = []
         holdings_dict[record].append(
             {'barcode': barcode, 'status': status,
              'circ_lib': circ_lib, 'location_id': location_id,
-             'location': location, 'call_number': call_number})
+             'location': location, 'call_number': call_number,
+             'due_date': due_date})
     logging.info('Fetched %s holdings.' % (holdings_count,))
     return holdings_dict
 
