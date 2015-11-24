@@ -348,8 +348,9 @@ FROM asset.call_number acn
 WHERE label = '##URI##' AND owning_lib IN (SELECT id FROM actor.org_unit_descendants(22))
 AND NOT acn.deleted
 )
-SELECT bre.id, bre.marc, bre.create_date, bre.edit_date
+SELECT bre.id, bre.marc, bre.create_date, bre.edit_date, cbs.source
 FROM biblio.record_entry bre
+LEFT JOIN config.bib_source cbs ON bre.source = cbs.id
 JOIN visible ON visible.record = bre.id
 WHERE (
     NOT bre.deleted
@@ -380,13 +381,14 @@ LIMIT 1000
 
     holdings = index_holdings(egconn, record_ids)
 
-    for (bre_id, marc, create_date, edit_date) in results:
+    for (bre_id, marc, create_date, edit_date, source) in results:
         index_count += 1
         record = ET.fromstring(marc)
         mods = transform(record)
         output = index_mods(mods)
         output['title_display'] = get_title_display(record)
         output['id'] = bre_id
+        output['source'] = source
         output['create_date'] = create_date
         output['edit_date'] = edit_date
         if bre_id in holdings:
@@ -455,10 +457,11 @@ def incremental_index_page(egconn, state):
     last_id = state['last_id']
 
     egcur.execute('''
-SELECT bre.id, bre.marc, bre.create_date, bre.edit_date,
+SELECT bre.id, bre.marc, bre.create_date, bre.edit_date, cbs.source,
     GREATEST(MAX(bre.edit_date), MAX(acn.edit_date), MAX(acp.edit_date)) AS
     last_edit_date
 FROM biblio.record_entry bre
+LEFT JOIN config.bib_source cbs ON bre.source = cbs.id
 LEFT JOIN asset.call_number acn ON bre.id = acn.record
 LEFT JOIN asset.copy acp ON acp.call_number = acn.id
 WHERE (
@@ -496,7 +499,8 @@ LIMIT 1000
 
     holdings = index_holdings(egconn, record_ids)
 
-    for (bre_id, marc, create_date, edit_date, last_edit_date) in results:
+    for (bre_id, marc, create_date, edit_date, source,
+         last_edit_date) in results:
         logging.info("bib %s last_edit_date %s" % (bre_id, last_edit_date))
         index_count += 1
         record = ET.fromstring(marc)
@@ -504,6 +508,7 @@ LIMIT 1000
         output = index_mods(mods)
         output['title_display'] = get_title_display(record)
         output['id'] = bre_id
+        output['source'] = source
         output['create_date'] = create_date
         output['edit_date'] = edit_date
         if bre_id in holdings:

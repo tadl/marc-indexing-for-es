@@ -42,6 +42,11 @@ es.indices.put_mapping(
     body={
         'record': {
             'properties': {
+                "source": {
+                    "type": "string",
+                    "index": "not_analyzed",
+                    "include_in_all": "false",
+                },
                 'title_display': {
                     'type': 'string',
                     'analyzer': 'english',
