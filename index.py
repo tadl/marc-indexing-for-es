@@ -129,6 +129,18 @@ def insert_to_elasticsearch(output):
         logging.debug(repr(indexresult))
 
 
+def detect_large_print(record):
+    matches = record.xpath('//*[@tag="250" or @tag="300" '
+                           'or @tag="650" or @tag="655"]/*[@code="a"]',
+                           namespaces=namespace_dict)
+    if (len(matches)):
+        for match in matches:
+            if re.search(r"large (print|type)",
+                         match.text, flags=re.IGNORECASE):
+                return True
+    return False
+
+
 def get_title_display(record, output):
     title_match = record.xpath('//*[@tag="245"]/*[@code]',
                                namespaces=namespace_dict)
@@ -155,10 +167,14 @@ def get_title_display(record, output):
         title_display = ' '.join(title_parts)
         # Strip trailing punctuation from title
         title_display = re.sub('\s*[:;/]\s*$', '', title_display)
-        # If we have a videogame genre, append the proper suffix
-        for genre in output['genres']:
-            if genre in game_genre_suffixes:
-                title_display += ' ' + game_genre_suffixes[genre]
+        # Append (LARGE PRINT) where appropriate
+        if detect_large_print(record):
+            title_display += ' (LARGE PRINT)'
+        else:
+            # If not large print, check for videogame platform suffix
+            for genre in output['genres']:
+                if genre in game_genre_suffixes:
+                    title_display += ' ' + game_genre_suffixes[genre]
         return title_display
     else:
         logging.warn('Found no title for record.')
