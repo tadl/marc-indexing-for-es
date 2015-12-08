@@ -32,6 +32,17 @@ es_index = config['elasticsearch']['index']
 
 org_root = config.get('evergreen', 'org_root', fallback=1)
 
+# FIXME: Hardcoded for now
+game_genre_suffixes = {
+    'Nintendo Wii U video games.': '(Wii U)',
+    'Nintendo Wii video games.': '(Wii)',
+    'PlayStation 3 video games.': '(PS3)',
+    'PlayStation 2 video games.': '(PS2)',
+    'PlayStation 4 video games.': '(PS4)',
+    'Xbox 360 video games.': '(Xbox 360)',
+    'Xbox video games.': '(Xbox)',
+}
+
 if (es.ping()):
     print("ping!")
 
@@ -118,7 +129,7 @@ def insert_to_elasticsearch(output):
         logging.debug(repr(indexresult))
 
 
-def get_title_display(record):
+def get_title_display(record, output):
     title_match = record.xpath('//*[@tag="245"]/*[@code]',
                                namespaces=namespace_dict)
     if (len(title_match)):
@@ -144,6 +155,10 @@ def get_title_display(record):
         title_display = ' '.join(title_parts)
         # Strip trailing punctuation from title
         title_display = re.sub('\s*[:;/]\s*$', '', title_display)
+        # If we have a videogame genre, append the proper suffix
+        for genre in output['genres']:
+            if genre in game_genre_suffixes:
+                title_display += ' ' + game_genre_suffixes[genre]
         return title_display
     else:
         logging.warn('Found no title for record.')
@@ -392,7 +407,7 @@ LIMIT 1000
         record = ET.fromstring(marc)
         mods = transform(record)
         output = index_mods(mods)
-        output['title_display'] = get_title_display(record)
+        output['title_display'] = get_title_display(record, output)
         output['id'] = bre_id
         output['source'] = source
         output['create_date'] = create_date
@@ -515,7 +530,7 @@ LIMIT 1000
         record = ET.fromstring(marc)
         mods = transform(record)
         output = index_mods(mods)
-        output['title_display'] = get_title_display(record)
+        output['title_display'] = get_title_display(record, output)
         output['id'] = bre_id
         output['source'] = source
         output['create_date'] = create_date
