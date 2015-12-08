@@ -271,8 +271,9 @@ JOIN actor.org_unit aou ON acp.circ_lib = aou.id
 JOIN asset.call_number acn ON acp.call_number = acn.id
 JOIN asset.opac_visible_copies aovc ON acp.id = aovc.copy_id
 LEFT JOIN action.open_circulation ocirc ON ocirc.target_copy = acp.id
-WHERE acn.record = ANY(%s::BIGINT[])
-''', (record_ids,))
+WHERE acn.record = ANY(%(record_ids)s::BIGINT[])
+AND acp.circ_lib IN (SELECT id FROM actor.org_unit_descendants(%(org_root)s))
+''', {'record_ids': record_ids, 'org_root': org_root})
 
     for (record, copy_id, barcode, status, circ_lib, location_id, location,
          call_number, due_date) in cur:
