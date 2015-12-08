@@ -30,6 +30,8 @@ es = Elasticsearch([config['elasticsearch']['url']])
 
 es_index = config['elasticsearch']['index']
 
+org_root = config.get('evergreen', 'org_root', fallback=1)
+
 if (es.ping()):
     print("ping!")
 
@@ -341,11 +343,13 @@ def full_index_page(egconn, state):
 WITH visible AS (
 SELECT record
 FROM asset.opac_visible_copies aovc
-WHERE circ_lib IN (SELECT id FROM actor.org_unit_descendants(22))
+WHERE circ_lib IN (SELECT id FROM actor.org_unit_descendants(%(org_root)s))
 UNION
 SELECT record
 FROM asset.call_number acn
-WHERE label = '##URI##' AND owning_lib IN (SELECT id FROM actor.org_unit_descendants(22))
+WHERE label = '##URI##' AND owning_lib IN (
+    SELECT id FROM actor.org_unit_descendants(%(org_root)s)
+)
 AND NOT acn.deleted
 )
 SELECT bre.id, bre.marc, bre.create_date, bre.edit_date, cbs.source
@@ -366,7 +370,8 @@ WHERE (
 )
 ORDER BY bre.edit_date ASC, bre.id ASC
 LIMIT 1000
-''', {'last_edit_date': last_edit_date, 'last_id': last_id})
+''', {'last_edit_date': last_edit_date, 'last_id': last_id,
+      'org_root': org_root})
 
     # Clear last_edit_date, last_id
     state['last_edit_date'] = None
@@ -465,8 +470,10 @@ LEFT JOIN config.bib_source cbs ON bre.source = cbs.id
 LEFT JOIN asset.call_number acn ON bre.id = acn.record
 LEFT JOIN asset.copy acp ON acp.call_number = acn.id
 WHERE (
-    acp.circ_lib IN (SELECT id FROM actor.org_unit_descendants(22))
-    OR acn.owning_lib IN (SELECT id FROM actor.org_unit_descendants(22))
+    acp.circ_lib IN (SELECT id FROM actor.org_unit_descendants(%(org_root)s))
+    OR acn.owning_lib IN (
+        SELECT id FROM actor.org_unit_descendants(%(org_root)s)
+    )
 )
 AND (
     (
@@ -488,7 +495,8 @@ ORDER BY GREATEST(
     MAX(bre.edit_date), MAX(acn.edit_date), MAX(acp.edit_date)
 ) ASC, bre.id ASC
 LIMIT 1000
-''', {'last_edit_date': last_edit_date, 'last_id': last_id})
+''', {'last_edit_date': last_edit_date, 'last_id': last_id,
+      'org_root': org_root})
 
     results = egcur.fetchall()
 
