@@ -135,7 +135,7 @@ def detect_large_print(record):
                            namespaces=namespace_dict)
     if (len(matches)):
         for match in matches:
-            if re.search(r"large (print|type)",
+            if match.text and re.search(r"large (print|type)",
                          match.text, flags=re.IGNORECASE):
                 return True
     return False
