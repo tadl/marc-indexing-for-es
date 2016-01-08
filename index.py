@@ -522,7 +522,7 @@ AND (
         OR acp.edit_date > %(last_edit_date)s
     )
 )
-GROUP BY bre.id, bre.marc, bre.create_date, bre.edit_date
+GROUP BY bre.id, bre.marc, bre.create_date, bre.edit_date, cbs.source
 ORDER BY GREATEST(
     MAX(bre.edit_date), MAX(acn.edit_date), MAX(acp.edit_date)
 ) ASC, bre.id ASC
