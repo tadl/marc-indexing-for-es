@@ -70,7 +70,7 @@ indexes = {
     'author_other': {
         'xpath':
             "//mods32:mods/mods32:name[@type='personal' and not(mods32:role/mods32:roleTerm[text()='creator'])]",
-        'post_xpath': "//*[local-name()='namePart']",
+        'post_xpath': "//*[local-name()='namePart' and (not(@*[local-name()='type']) or not(@*[local-name()='type']='date'))] ",
         'array': True
     },
     'abstract': {
