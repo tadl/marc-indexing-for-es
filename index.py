@@ -17,6 +17,7 @@ from elasticsearch import Elasticsearch
 import elasticsearch.exceptions
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--id')
 parser.add_argument('--full', action='store_true')
 parser.add_argument('--incremental', action='store_true')
 
@@ -487,6 +488,40 @@ def full_index(egconn):
     logging.info("DONE!")
 
 
+def index_single_record(egconn, record_id):
+    egcur = egconn.cursor()
+    logging.info("Will index single record: %s" % (record_id,))
+    egcur.execute("""
+SELECT bre.id, bre.marc, bre.create_date, bre.edit_date, cbs.source
+FROM biblio.record_entry bre
+LEFT JOIN config.bib_source cbs ON bre.source = cbs.id
+WHERE bre.id = %s""", (record_id,))
+    results = egcur.fetchall()
+
+    # Get just the record IDs
+    record_ids = []
+    for result in results:
+        record_ids.append(result[0])
+
+    holdings = index_holdings(egconn, record_ids)
+
+    for (bre_id, marc, create_date, edit_date, source) in results:
+        record = ET.fromstring(marc)
+        mods = transform(record)
+        output = index_mods(mods)
+        output['title_display'] = get_title_display(record, output)
+        output['id'] = bre_id
+        output['source'] = source
+        output['create_date'] = create_date
+        output['edit_date'] = edit_date
+        if bre_id in holdings:
+            output['holdings'] = holdings[bre_id]
+        else:
+            output['holdings'] = []
+        logging.debug(repr(output))
+        insert_to_elasticsearch(output)
+
+
 def incremental_index_page(egconn, state):
     egcur = egconn.cursor()
     index_count = 0
@@ -616,7 +651,10 @@ if (xml_filename):
 else:
     # Index records from database
     egconn = get_db_conn()
-    if (args.full):
+    if (args.id):
+        logging.info(repr(args.id))
+        index_single_record(egconn, args.id)
+    elif (args.full):
         full_index(egconn)
     elif (args.incremental):
         incremental_index(egconn)
