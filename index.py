@@ -429,6 +429,23 @@ LIMIT 1000
         output = index_mods(mods)
         output['title_display'] = get_title_display(record, output)
         output['id'] = bre_id
+
+        if output['links']:
+            for link in output['links']:
+                if re.match('.*hoopladigital\.com.*', link):
+                    source = 'Hoopla'
+                elif re.match('.*safaribooksonline\.com.*', link):
+                    source = 'Safari'
+                elif re.match('.*\.lib\.overdrive\.com.*', link):
+                    source = 'OverDrive'
+                elif re.match('.*avod\.films\.com.*', link):
+                    source = 'AVOD'
+
+        if source in ['Safari', 'OverDrive', 'AVOD', 'Hoopla']:
+            output['electronic'] = True
+        else:
+            output['electronic'] = False
+
         output['source'] = source
         output['create_date'] = create_date
         output['edit_date'] = edit_date
@@ -514,6 +531,23 @@ WHERE bre.id = %s""", (record_id,))
         output = index_mods(mods)
         output['title_display'] = get_title_display(record, output)
         output['id'] = bre_id
+
+        if output['links']:
+            for link in output['links']:
+                if re.match('.*hoopladigital\.com.*', link):
+                    source = 'Hoopla'
+                elif re.match('.*safaribooksonline\.com.*', link):
+                    source = 'Safari'
+                elif re.match('.*\.lib\.overdrive\.com.*', link):
+                    source = 'OverDrive'
+                elif re.match('.*avod\.films\.com.*', link):
+                    source = 'AVOD'
+
+        if source in ['Safari', 'OverDrive', 'AVOD', 'Hoopla']:
+            output['electronic'] = True
+        else:
+            output['electronic'] = False
+
         output['source'] = source
         output['create_date'] = create_date
         output['edit_date'] = edit_date
@@ -586,6 +620,23 @@ LIMIT 1000
         output = index_mods(mods)
         output['title_display'] = get_title_display(record, output)
         output['id'] = bre_id
+
+        if output['links']:
+            for link in output['links']:
+                if re.match('.*hoopladigital\.com.*', link):
+                    source = 'Hoopla'
+                elif re.match('.*safaribooksonline\.com.*', link):
+                    source = 'Safari'
+                elif re.match('.*\.lib\.overdrive\.com.*', link):
+                    source = 'OverDrive'
+                elif re.match('.*avod\.films\.com.*', link):
+                    source = 'AVOD'
+
+        if source in ['Safari', 'OverDrive', 'AVOD', 'Hoopla']:
+            output['electronic'] = True
+        else:
+            output['electronic'] = False
+
         output['source'] = source
         output['create_date'] = create_date
         output['edit_date'] = edit_date

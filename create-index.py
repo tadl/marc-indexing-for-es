@@ -203,6 +203,11 @@ es.indices.put_mapping(
                     'index': 'not_analyzed',
                     'include_in_all': 'false',
                 },
+                'electronic': {
+                    'type': 'boolean',
+                    'index': 'not_analyzed',
+                    'include_in_all': 'false',
+                },
                 'holdings': {
                     'type': 'nested',
                     'properties': {
