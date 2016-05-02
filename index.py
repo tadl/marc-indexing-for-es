@@ -489,7 +489,7 @@ def full_index(egconn):
         set_state('full', 'last_id', None)
     else:
         logging.info('RESUMING EXISTING full indexing run')
-    logging.info("Retreived state: " + repr(state))
+    logging.info("Retrieved state: " + repr(state))
     # Index a "page" of records at a time
     # loop while number of records indexed != 0
     indexed_count = None
