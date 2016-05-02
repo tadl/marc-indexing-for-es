@@ -12,7 +12,7 @@ es = Elasticsearch([config['elasticsearch']['url']])
 index_name = config['elasticsearch']['index']
 
 if (es.ping()):
-    print "ping!"
+    print("ping!")
 
 es.indices.create(
     index=index_name,
