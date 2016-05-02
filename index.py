@@ -9,6 +9,7 @@ import logging.config
 import re
 import sys
 import time
+from datetime import date
 
 import configparser  # under Python 2, this is a backport
 import lxml.etree as ET
@@ -46,6 +47,17 @@ game_genre_suffixes = {
 
 if (es.ping()):
     print("ping!")
+
+today = date.today()
+today_string = today.strftime("%Y%m%d")
+
+es_index = es_index + '_' + today_string
+
+if es.indices.exists(es_index) is False:
+    logging.error("Index does not exist: %s" % (es_index))
+    sys.exit(1)
+
+docs_count = es.indices.stats(es_index)['indices'][es_index]['total']['docs']['count']
 
 xml_filename = None
 xsl_filename = 'MARC21slim2MODS3-2.xsl'
@@ -668,6 +680,11 @@ def incremental_index(egconn):
         logging.error("Cannot perform incremental index while full index is "
                       "in a state of in_progress")
         sys.exit(1)
+
+    if (docs_count == 0):
+        logging.error("Index is empty -- aborting incremental update.")
+        sys.exit(1)
+
     state = load_incremental_state()
     logging.info("Loaded state " + repr(state))
     # Index a "page" of records at a time
