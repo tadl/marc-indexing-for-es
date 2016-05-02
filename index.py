@@ -121,14 +121,13 @@ transform = ET.XSLT(xslt)
 
 
 def insert_to_elasticsearch(output):
-    if output['holdings'] == []:
-        if output['links'] == '':
-            try:
-                logging.info('Removing record ID %s' % (output['id'],))
-                deleteresult = es.delete(index=es_index, doc_type='record', id=output['id'])
-            except(elasticsearch.exceptions.NotFoundError):
-                logging.info('Record ID %s not found. No big deal.' % (output['id'],))
-                pass
+    if output['holdings'] == [] and output['links'] == '':
+        try:
+            logging.info('Removing record ID %s' % (output['id'],))
+            deleteresult = es.delete(index=es_index, doc_type='record', id=output['id'])
+        except(elasticsearch.exceptions.NotFoundError):
+            logging.info('Record ID %s not found. No big deal.' % (output['id'],))
+            pass
     else:
         indexresult = es.index(index=es_index, doc_type='record', id=output['id'], body=output)
         logging.debug(repr(indexresult))
