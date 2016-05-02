@@ -59,6 +59,10 @@ indexes = {
     'title': {
         'xpath': "//mods32:mods/mods32:titleInfo[mods32:title and not (@type)]",
     },
+    'title_alt': {
+        'xpath': "//mods32:mods/mods32:titleInfo[mods32:title and (@type='alternative')]",
+        'array': True
+    },
     'author': {
         'xpath': "//mods32:mods/mods32:name[@type='personal' and mods32:role/mods32:roleTerm[text()='creator']]",
         'post_xpath': "//*[local-name()='namePart']"
