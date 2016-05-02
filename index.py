@@ -340,6 +340,29 @@ AND acp.circ_lib IN (SELECT id FROM actor.org_unit_descendants(%(org_root)s))
     return holdings_dict
 
 
+def get_hold_counts(conn, record_ids):
+    holdcount_dict = {}
+
+    cur = conn.cursor()
+
+    cur.execute('''
+SELECT ahr.target, COUNT(*)
+FROM action.hold_request ahr
+WHERE ahr.hold_type = 'T'
+AND ahr.fulfillment_time IS NULL
+AND ahr.cancel_time IS NULL
+AND ahr.target = ANY(%(record_ids)s::BIGINT[])
+AND ahr.pickup_lib IN (SELECT id FROM actor.org_unit_descendants(%(org_root)s))
+GROUP BY ahr.target
+''', {'record_ids': record_ids, 'org_root': org_root})
+
+    for (record, hold_count) in cur:
+        logging.debug([record, hold_count])
+        holdcount_dict[record] = hold_count
+    logging.info('Fetched hold counts for %s records.' % (len(record_ids),))
+    return holdcount_dict
+
+
 def get_db_conn():
     dbcfg = config['evergreen_db']
     conn = psycopg2.connect(dbname=dbcfg['dbname'], user=dbcfg['user'],
@@ -435,6 +458,8 @@ LIMIT 1000
 
     holdings = index_holdings(egconn, record_ids)
 
+    hold_counts = get_hold_counts(egconn, record_ids)
+
     for (bre_id, marc, create_date, edit_date, source) in results:
         index_count += 1
         record = ET.fromstring(marc)
@@ -466,6 +491,10 @@ LIMIT 1000
             output['holdings'] = holdings[bre_id]
         else:
             output['holdings'] = []
+        if bre_id in hold_counts:
+            output['hold_count'] = hold_counts[bre_id]
+        else:
+            output['hold_count'] = 0
         logging.debug(repr(output))
         insert_to_elasticsearch(output)
         # Update state vars -- the most recent value of these will be
@@ -538,6 +567,8 @@ WHERE bre.id = %s""", (record_id,))
 
     holdings = index_holdings(egconn, record_ids)
 
+    hold_counts = get_hold_counts(egconn, record_ids)
+
     for (bre_id, marc, create_date, edit_date, source) in results:
         record = ET.fromstring(marc)
         mods = transform(record)
@@ -568,6 +599,10 @@ WHERE bre.id = %s""", (record_id,))
             output['holdings'] = holdings[bre_id]
         else:
             output['holdings'] = []
+        if bre_id in hold_counts:
+            output['hold_count'] = hold_counts[bre_id]
+        else:
+            output['hold_count'] = 0
         logging.debug(repr(output))
         insert_to_elasticsearch(output)
 
@@ -624,6 +659,8 @@ LIMIT 1000
 
     holdings = index_holdings(egconn, record_ids)
 
+    hold_counts = get_hold_counts(egconn, record_ids)
+
     for (bre_id, marc, create_date, edit_date, source,
          last_edit_date) in results:
         logging.info("bib %s last_edit_date %s" % (bre_id, last_edit_date))
@@ -657,6 +694,10 @@ LIMIT 1000
             output['holdings'] = holdings[bre_id]
         else:
             output['holdings'] = []
+        if bre_id in hold_counts:
+            output['hold_count'] = hold_counts[bre_id]
+        else:
+            output['hold_count'] = 0
         logging.debug(repr(output))
         insert_to_elasticsearch(output)
         # Update state vars -- the most recent value of these will be
