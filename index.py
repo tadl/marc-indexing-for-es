@@ -140,7 +140,7 @@ def detect_large_print(record):
     if (len(matches)):
         for match in matches:
             if match.text and re.search(r"large (print|type)",
-                         match.text, flags=re.IGNORECASE):
+                                        match.text, flags=re.IGNORECASE):
                 return True
     return False
 
@@ -182,6 +182,7 @@ def get_title_display(record, output):
         return title_display
     else:
         logging.warn('Found no title for record.')
+
 
 def get_titles_misc(mods):
     # We'd like to return two things:
@@ -464,7 +465,7 @@ LIMIT 1000
 
 def full_index(egconn):
     state = load_full_state()
-    if (state['in_progress'] != True):
+    if state['in_progress'] is False:
         logging.info('STARTING NEW full indexing run')
         egcur = egconn.cursor()
         egcur.execute("SELECT NOW();")
