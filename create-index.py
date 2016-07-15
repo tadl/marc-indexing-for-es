@@ -223,6 +223,11 @@ es.indices.put_mapping(
                     'index': 'not_analyzed',
                     'include_in_all': 'false',
                 },
+                'fiction': {
+                    'type': 'boolean',
+                    'index': 'not_analyzed',
+                    'include_in_all': 'false',
+                },
                 'holdings': {
                     'type': 'nested',
                     'properties': {
@@ -259,6 +264,26 @@ es.indices.put_mapping(
                         'due_date': {
                             'type': 'date',
                             'format': 'yyyy-MM-dd',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
+                    }
+                },
+                'attrs': {
+                    'type': 'nested',
+                    'properties': {
+                        'ctype': {
+                            'type': 'string',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
+                        'code': {
+                            'type': 'string',
+                            'index': 'not_analyzed',
+                            'include_in_all': 'false',
+                        },
+                        'value': {
+                            'type': 'string',
                             'index': 'not_analyzed',
                             'include_in_all': 'false',
                         },

@@ -157,6 +157,16 @@ def detect_large_print(record):
     return False
 
 
+def detect_fiction(holdings, attrs):
+    fiction = None
+    if (len(attrs)):
+        if (attrs[0]['ctype'] == 'lit_form' and attrs[0]['code'] == '1'):
+            return True
+        if (attrs[0]['ctype'] == 'lit_form' and attrs[0]['code'] == '0'):
+            return False
+    return fiction
+
+
 def get_title_display(record, output):
     title_match = record.xpath('//*[@tag="245"]/*[@code]',
                                namespaces=namespace_dict)
@@ -340,6 +350,30 @@ AND acp.circ_lib IN (SELECT id FROM actor.org_unit_descendants(%(org_root)s))
     return holdings_dict
 
 
+def cache_attrs(conn, record_ids):
+    attrs_dict = {}
+    attrs_count = 0
+
+    cur = conn.cursor()
+
+    cur.execute('''
+SELECT v.source, c.ctype, c.code, c.value
+FROM metabib.record_attr_vector_list v
+JOIN config.coded_value_map c ON c.id = ANY (v.vlist)
+WHERE c.ctype = 'lit_form'
+AND v.source = ANY(%(record_ids)s::BIGINT[])
+''', {'record_ids': record_ids})
+
+    for (record, ctype, code, value) in cur:
+        attrs_count += 1
+        if record not in attrs_dict:
+            attrs_dict[record] = []
+        attrs_dict[record].append(
+            {'ctype': ctype, 'code': code, 'value': value})
+    logging.info('Fetched %s attrs.' % (attrs_count,))
+    return attrs_dict
+
+
 def get_hold_counts(conn, record_ids):
     holdcount_dict = {}
 
@@ -457,6 +491,7 @@ LIMIT 1000
         record_ids.append(result[0])
 
     holdings = index_holdings(egconn, record_ids)
+    attrs = cache_attrs(egconn, record_ids)
 
     hold_counts = get_hold_counts(egconn, record_ids)
 
@@ -491,10 +526,15 @@ LIMIT 1000
             output['holdings'] = holdings[bre_id]
         else:
             output['holdings'] = []
+        if bre_id in attrs:
+            output['attrs'] = attrs[bre_id]
+        else:
+            output['attrs'] = []
         if bre_id in hold_counts:
             output['hold_count'] = hold_counts[bre_id]
         else:
             output['hold_count'] = 0
+        output['fiction'] = detect_fiction(output['holdings'], output['attrs'])
         logging.debug(repr(output))
         insert_to_elasticsearch(output)
         # Update state vars -- the most recent value of these will be
@@ -566,6 +606,7 @@ WHERE bre.id = %s""", (record_id,))
         record_ids.append(result[0])
 
     holdings = index_holdings(egconn, record_ids)
+    attrs = cache_attrs(egconn, record_ids)
 
     hold_counts = get_hold_counts(egconn, record_ids)
 
@@ -599,10 +640,15 @@ WHERE bre.id = %s""", (record_id,))
             output['holdings'] = holdings[bre_id]
         else:
             output['holdings'] = []
+        if bre_id in attrs:
+            output['attrs'] = attrs[bre_id]
+        else:
+            output['attrs'] = []
         if bre_id in hold_counts:
             output['hold_count'] = hold_counts[bre_id]
         else:
             output['hold_count'] = 0
+        output['fiction'] = detect_fiction(output['holdings'], output['attrs'])
         logging.debug(repr(output))
         insert_to_elasticsearch(output)
 
@@ -658,6 +704,7 @@ LIMIT 1000
         record_ids.append(result[0])
 
     holdings = index_holdings(egconn, record_ids)
+    attrs = cache_attrs(egconn, record_ids)
 
     hold_counts = get_hold_counts(egconn, record_ids)
 
@@ -694,10 +741,15 @@ LIMIT 1000
             output['holdings'] = holdings[bre_id]
         else:
             output['holdings'] = []
+        if bre_id in attrs:
+            output['attrs'] = attrs[bre_id]
+        else:
+            output['attrs'] = []
         if bre_id in hold_counts:
             output['hold_count'] = hold_counts[bre_id]
         else:
             output['hold_count'] = 0
+        output['fiction'] = detect_fiction(output['holdings'], output['attrs'])
         logging.debug(repr(output))
         insert_to_elasticsearch(output)
         # Update state vars -- the most recent value of these will be
