@@ -193,10 +193,10 @@ def get_title_display(record, output):
                     title_display += ' ' + game_genre_suffixes[genre]
         return title_display
     else:
-        logging.warn('Found no title for record.')
+        logging.warn('Found no title for record %s' % (rec_id,))
 
 
-def get_titles_misc(mods):
+def get_titles_misc(rec_id, mods):
     # We'd like to return two things:
     # title_short
     # title_nonfiling
@@ -206,7 +206,7 @@ def get_titles_misc(mods):
     if (len(titles)):
         first_title = titles[0]
     else:
-        logging.warn('No title matches')
+        logging.warn('No title matches for record %s' % (rec_id,))
         return ('', '')
     non_sort_match = first_title.xpath(
         ".//*[local-name()='nonSort']",
@@ -222,7 +222,7 @@ def get_titles_misc(mods):
         title_short = title_short + title_match[0].text
         title_nonfiling = title_match[0].text
     else:
-        logging.warn('No value found for title_nonfiling')
+        logging.warn('No value found for title_nonfiling for record %s' % (rec_id,))
         title_nonfiling = ''
     return (title_short, title_nonfiling)
 
@@ -261,7 +261,7 @@ def get_901c(record):
     return id
 
 
-def index_mods(mods):
+def index_mods(rec_id, mods):
     output = {}
 
     for index in list(indexes.keys()):
@@ -295,7 +295,7 @@ def index_mods(mods):
         logging.debug('Setting corpauthor to author')
         output['author'] = output['corpauthor']
 
-    (output['title_short'], output['title_nonfiling']) = get_titles_misc(mods)
+    (output['title_short'], output['title_nonfiling']) = get_titles_misc(rec_id, mods)
     output['subjects'] = get_subjects(mods)
     output['genres'] = get_genres(mods)
 
@@ -464,9 +464,9 @@ LIMIT 1000
         index_count += 1
         record = ET.fromstring(marc)
         mods = transform(record)
-        output = index_mods(mods)
-        output['title_display'] = get_title_display(record, output)
+        output = index_mods(bre_id, mods)
         output['id'] = bre_id
+        output['title_display'] = get_title_display(bre_id, record, output)
 
         if output['links']:
             for link in output['links']:
@@ -572,9 +572,9 @@ WHERE bre.id = %s""", (record_id,))
     for (bre_id, marc, create_date, edit_date, source) in results:
         record = ET.fromstring(marc)
         mods = transform(record)
-        output = index_mods(mods)
-        output['title_display'] = get_title_display(record, output)
+        output = index_mods(bre_id, mods)
         output['id'] = bre_id
+        output['title_display'] = get_title_display(bre_id, record, output)
 
         if output['links']:
             for link in output['links']:
@@ -667,9 +667,9 @@ LIMIT 1000
         index_count += 1
         record = ET.fromstring(marc)
         mods = transform(record)
-        output = index_mods(mods)
-        output['title_display'] = get_title_display(record, output)
+        output = index_mods(bre_id, mods)
         output['id'] = bre_id
+        output['title_display'] = get_title_display(bre_id, record, output)
 
         if output['links']:
             for link in output['links']:
@@ -754,10 +754,11 @@ if (xml_filename):
     collection = collection_dom.getroot()
 
     for record in collection:
+        rec_id = get_901c(record)
         mods = transform(record)
-        output = index_mods(mods)
-        output['title_display'] = get_title_display(record)
-        output['id'] = get_901c(record)
+        output = index_mods(rec_id, mods)
+        output['id'] = rec_id
+        output['title_display'] = get_title_display(rec_id, record, output)
         output['create_date'] = None
         output['edit_date'] = None
         insert_to_elasticsearch(output)
