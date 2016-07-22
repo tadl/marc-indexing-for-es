@@ -157,7 +157,7 @@ def detect_large_print(record):
     return False
 
 
-def get_title_display(record, output):
+def get_title_display(rec_id, record, output):
     title_match = record.xpath('//*[@tag="245"]/*[@code]',
                                namespaces=namespace_dict)
     if (len(title_match)):
